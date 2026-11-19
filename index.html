@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>3D Spatial Audio Studio V2 — 空间编曲与双耳声场工作站</title>
+  <title>AETHER 3D — 空间电音编曲工作站 V3 Pro</title>
   <style>
     :root {
-      --glass-bg: rgba(10, 15, 28, 0.52);
-      --glass-border: rgba(255, 255, 255, 0.15);
-      --glass-soft: rgba(255, 255, 255, 0.05);
+      --glass-bg: rgba(9, 13, 24, 0.56);
+      --glass-border: rgba(255, 255, 255, 0.14);
+      --glass-soft: rgba(255, 255, 255, 0.045);
       --text-main: #f8fafc;
       --text-muted: rgba(226, 232, 240, 0.68);
       --accent: #38bdf8;
+      --accent-hot: #f43f5e;
+      --accent-purple: #a855f7;
       --ear-l: #22d3ee;
       --ear-r: #fb7185;
     }
@@ -27,27 +29,27 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: #050811;
+      background-color: #04070f;
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "PingFang SC", sans-serif;
       user-select: none;
     }
 
-    /* 静态液态流体背景：严格置于 body 最顶部，5 个不同色系圆形分布在四角与中心 */
+    /* 静态液态流体背景：严格置于 body 顶部，5 色圆形分布于四角与中心 */
     .fluid-bg {
       position: fixed;
       inset: 0;
       overflow: hidden;
       z-index: 0;
       pointer-events: none;
-      background: #050811;
+      background: #04070f;
     }
 
     .fluid-orb {
       position: absolute;
       border-radius: 50%;
       filter: blur(max(8vw, 8vh));
-      opacity: 0.45;
+      opacity: 0.44;
       transform: translate(-50%, -50%);
       will-change: transform;
     }
@@ -102,14 +104,14 @@
     /* 液态磨砂面板 */
     .glass-panel {
       background: var(--glass-bg);
-      backdrop-filter: blur(26px) saturate(170%);
-      -webkit-backdrop-filter: blur(26px) saturate(170%);
+      backdrop-filter: blur(28px) saturate(175%);
+      -webkit-backdrop-filter: blur(28px) saturate(175%);
       border: 1px solid var(--glass-border);
-      box-shadow: 0 14px 44px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.12);
       border-radius: 18px;
     }
 
-    /* 顶部状态与双耳实时电平条 */
+    /* 顶部状态栏与实时双耳电平表 */
     .top-hud {
       position: fixed;
       top: 14px;
@@ -129,7 +131,7 @@
       height: 8px;
       border-radius: 50%;
       background: #64748b;
-      transition: all 0.25s;
+      transition: all 0.2s;
     }
 
     .hud-dot.active {
@@ -142,12 +144,12 @@
       align-items: center;
       gap: 6px;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .meter-track {
-      width: 58px;
-      height: 6px;
+      width: 66px;
+      height: 7px;
       border-radius: 99px;
       background: rgba(255, 255, 255, 0.12);
       overflow: hidden;
@@ -157,36 +159,36 @@
       height: 100%;
       width: 0%;
       border-radius: 99px;
-      transition: width 0.05s linear;
+      transition: width 0.04s linear;
     }
 
-    /* 左侧主控面板 */
+    /* 左侧主控台 */
     .panel-left {
       position: fixed;
       top: 14px;
       left: 14px;
       bottom: 14px;
-      width: 322px;
+      width: 342px;
       z-index: 10;
       display: flex;
       flex-direction: column;
-      padding: 16px;
-      gap: 12px;
+      padding: 15px;
+      gap: 11px;
       overflow-y: auto;
     }
 
-    /* 右侧单点精细控制面板 */
+    /* 右侧单点控制面板 */
     .panel-right {
       position: fixed;
       top: 14px;
       right: 14px;
       bottom: 14px;
-      width: 280px;
+      width: 294px;
       z-index: 10;
       display: flex;
       flex-direction: column;
-      padding: 16px;
-      gap: 12px;
+      padding: 15px;
+      gap: 11px;
       overflow-y: auto;
     }
 
@@ -197,11 +199,11 @@
 
     .panel-left::-webkit-scrollbar-thumb,
     .panel-right::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.22);
       border-radius: 4px;
     }
 
-    /* 底部编曲混音台 */
+    /* 底部现场 Live 控制台 */
     .bottom-dock {
       position: fixed;
       bottom: 14px;
@@ -212,30 +214,29 @@
       flex-direction: column;
       gap: 8px;
       padding: 10px 16px;
-      min-width: 520px;
-      max-width: calc(100vw - 640px);
+      min-width: 560px;
+      max-width: calc(100vw - 670px);
     }
 
     .dock-top {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
     }
 
     .chord-pill {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      font-weight: 700;
+      justify-content: center;
       padding: 4px 10px;
       border-radius: 8px;
       background: rgba(56, 189, 248, 0.16);
-      border: 1px solid rgba(56, 189, 248, 0.35);
+      border: 1px solid rgba(56, 189, 248, 0.42);
       color: #e0f2fe;
-      min-width: 112px;
-      justify-content: center;
+      font-size: 11.5px;
+      font-weight: 700;
+      min-width: 116px;
+      font-variant-numeric: tabular-nums;
     }
 
     .step-bar {
@@ -246,27 +247,62 @@
     }
 
     .step-cell {
-      height: 7px;
+      height: 8px;
       border-radius: 3px;
-      background: rgba(255, 255, 255, 0.12);
-      transition: background 0.08s, transform 0.08s;
+      background: rgba(255, 255, 255, 0.11);
+      transition: background 0.06s, transform 0.06s;
     }
 
-    .step-cell.beat {
-      background: rgba(255, 255, 255, 0.24);
-    }
-
+    .step-cell.beat { background: rgba(255, 255, 255, 0.24); }
     .step-cell.now {
       background: #38bdf8;
-      box-shadow: 0 0 8px #38bdf8;
-      transform: scaleY(1.3);
+      box-shadow: 0 0 10px #38bdf8;
+      transform: scaleY(1.35);
+    }
+
+    .dock-mid {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .energy-bar {
+      display: flex;
+      gap: 5px;
+    }
+
+    .energy-btn {
+      padding: 4px 9px;
+      border-radius: 7px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.16s;
+    }
+
+    .energy-btn:hover { background: rgba(255, 255, 255, 0.13); color: #fff; }
+    .energy-btn.active {
+      background: rgba(56, 189, 248, 0.28);
+      border-color: rgba(56, 189, 248, 0.78);
+      color: #fff;
+    }
+    .energy-btn[data-energy="drop"].active {
+      background: linear-gradient(135deg, rgba(244, 63, 94, 0.58), rgba(245, 158, 11, 0.52));
+      border-color: rgba(251, 113, 133, 0.9);
+      box-shadow: 0 0 14px rgba(244, 63, 94, 0.4);
     }
 
     .stem-row {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
       flex-wrap: wrap;
     }
 
@@ -274,25 +310,19 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 5px 10px;
+      padding: 4px 9px;
       border-radius: 99px;
       border: 1px solid var(--glass-border);
       background: rgba(255, 255, 255, 0.06);
       color: var(--text-main);
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.16s;
+      transition: all 0.15s;
     }
 
-    .stem-btn:hover {
-      background: rgba(255, 255, 255, 0.14);
-    }
-
-    .stem-btn.off {
-      opacity: 0.35;
-      text-decoration: line-through;
-    }
+    .stem-btn:hover { background: rgba(255, 255, 255, 0.15); }
+    .stem-btn.off { opacity: 0.32; text-decoration: line-through; }
 
     .stem-dot {
       width: 7px;
@@ -300,25 +330,38 @@
       border-radius: 50%;
     }
 
-    /* 通用排版与控件 */
-    .brand-title {
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
+    /* 头部与主按钮 */
+    .brand-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    .brand-sub {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 2px;
+    .brand-title {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      background: linear-gradient(90deg, #f8fafc, #38bdf8, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 99px;
+      background: rgba(168, 85, 247, 0.25);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      color: #e9d5ff;
     }
 
     .btn-primary {
       width: 100%;
       padding: 11px 14px;
       border-radius: 12px;
-      border: 1px solid rgba(56, 189, 248, 0.5);
-      background: linear-gradient(135deg, rgba(14, 165, 233, 0.48), rgba(139, 92, 246, 0.48));
+      border: 1px solid rgba(56, 189, 248, 0.55);
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.52), rgba(168, 85, 247, 0.52));
       color: #fff;
       font-size: 13px;
       font-weight: 700;
@@ -328,70 +371,81 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      letter-spacing: 0.02em;
     }
 
     .btn-primary:hover {
       transform: translateY(-1px);
-      background: linear-gradient(135deg, rgba(14, 165, 233, 0.66), rgba(139, 92, 246, 0.66));
+      box-shadow: 0 6px 22px rgba(56, 189, 248, 0.3);
     }
 
     .btn-primary.playing {
-      border-color: rgba(244, 63, 94, 0.6);
-      background: linear-gradient(135deg, rgba(244, 63, 94, 0.46), rgba(245, 158, 11, 0.42));
+      border-color: rgba(244, 63, 94, 0.7);
+      background: linear-gradient(135deg, rgba(244, 63, 94, 0.54), rgba(245, 158, 11, 0.48));
+    }
+
+    .btn-mutate {
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(168, 85, 247, 0.55);
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.32), rgba(236, 72, 153, 0.28));
+      color: #f5f3ff;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.16s;
+    }
+
+    .btn-mutate:hover {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.52), rgba(236, 72, 153, 0.48));
+      transform: translateY(-1px);
     }
 
     .section-label {
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.09em;
       color: var(--text-muted);
-      margin-bottom: 6px;
+      margin-bottom: 5px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
 
     .btn-chip {
-      padding: 7px 8px;
+      padding: 7px 6px;
       border-radius: 9px;
       border: 1px solid var(--glass-border);
       background: rgba(255, 255, 255, 0.05);
       color: var(--text-main);
-      font-size: 11px;
+      font-size: 10.8px;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.16s;
+      transition: all 0.15s;
       text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .btn-chip:hover {
-      background: rgba(255, 255, 255, 0.13);
-    }
-
+    .btn-chip:hover { background: rgba(255, 255, 255, 0.14); }
     .btn-chip.active {
       background: rgba(56, 189, 248, 0.28);
-      border-color: rgba(56, 189, 248, 0.72);
+      border-color: rgba(56, 189, 248, 0.78);
       color: #e0f2fe;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .control-group {
       display: flex;
       flex-direction: column;
-      gap: 9px;
-      padding: 11px 12px;
+      gap: 8px;
+      padding: 10px 11px;
       border-radius: 12px;
       background: var(--glass-soft);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -413,24 +467,35 @@
     .slider-header strong {
       color: var(--text-main);
       font-variant-numeric: tabular-nums;
-      font-weight: 600;
+      font-weight: 700;
     }
 
+    /* 高质感发光进度条滑块 */
     input[type="range"] {
       -webkit-appearance: none;
       width: 100%;
-      height: 5px;
+      height: 6px;
       border-radius: 99px;
-      background: rgba(255, 255, 255, 0.16);
+      background: linear-gradient(90deg, #38bdf8 var(--pct, 50%), rgba(255, 255, 255, 0.14) var(--pct, 50%));
       outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"].hot {
+      background: linear-gradient(90deg, #f43f5e var(--pct, 50%), rgba(255, 255, 255, 0.14) var(--pct, 50%));
+    }
+
+    input[type="range"].purple {
+      background: linear-gradient(90deg, #a855f7 var(--pct, 50%), rgba(255, 255, 255, 0.14) var(--pct, 50%));
     }
 
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 13px;
-      height: 13px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
-      background: #fff;
+      background: #ffffff;
+      border: 2px solid #0f172a;
       box-shadow: 0 0 10px rgba(56, 189, 248, 0.85);
       cursor: pointer;
     }
@@ -453,9 +518,7 @@
       flex-shrink: 0;
     }
 
-    .switch.on {
-      background: rgba(16, 185, 129, 0.8);
-    }
+    .switch.on { background: rgba(16, 185, 129, 0.85); }
 
     .switch::after {
       content: "";
@@ -469,18 +532,17 @@
       transition: transform 0.2s;
     }
 
-    .switch.on::after {
-      transform: translateX(17px);
-    }
+    .switch.on::after { transform: translateX(17px); }
 
     select {
       width: 100%;
       padding: 7px 10px;
       border-radius: 9px;
       border: 1px solid var(--glass-border);
-      background: rgba(15, 23, 42, 0.78);
+      background: rgba(11, 17, 32, 0.86);
       color: var(--text-main);
       font-size: 11.5px;
+      font-weight: 600;
       outline: none;
       cursor: pointer;
     }
@@ -525,16 +587,22 @@
       border-radius: 50%;
     }
 
-    @media (max-width: 1100px) {
+    .seed-tag {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 10px;
+      color: #c084fc;
+    }
+
+    @media (max-width: 1150px) {
       .bottom-dock { min-width: 340px; max-width: calc(100vw - 32px); }
-      .panel-left { width: 260px; }
-      .panel-right { width: 240px; }
+      .panel-left { width: 270px; }
+      .panel-right { width: 245px; }
       .top-hud { display: none; }
     }
   </style>
 </head>
 <body>
-  <!-- 静态液态流体背景（5色圆形，位于 body 最顶部） -->
+  <!-- 静态液态流体背景：严格置于 body 最顶部，5 个不同色系圆形分布在四角与中心 -->
   <div class="fluid-bg" aria-hidden="true">
     <div class="fluid-orb orb-emerald"></div>
     <div class="fluid-orb orb-violet"></div>
@@ -543,72 +611,168 @@
     <div class="fluid-orb orb-amber"></div>
   </div>
 
-  <!-- 3D 渲染画布 -->
+  <!-- 3D 场景容器 -->
   <div id="canvas-container"></div>
 
-  <!-- 顶部 HUD：状态 + 实时双耳声压表 -->
+  <!-- 顶部 HUD：状态 + 实时左右双耳声压电平 -->
   <div class="top-hud glass-panel">
     <div class="hud-dot" id="audio-dot"></div>
-    <span id="hud-status">待机中 · 佩戴耳机启动空间编曲</span>
+    <span id="hud-status">AETHER 3D 就绪 · 佩戴耳机启动空间电音</span>
     <span style="opacity:.25">|</span>
     <div class="meter-wrap">
       <span style="color:var(--ear-l)">L 左耳</span>
-      <div class="meter-track"><div class="meter-fill" id="meter-l" style="background:var(--ear-l)"></div></div>
+      <div class="meter-track"><div class="meter-fill" id="meter-l" style="background:linear-gradient(90deg,#06b6d4,#67e8f9)"></div></div>
     </div>
     <div class="meter-wrap">
       <span style="color:var(--ear-r)">R 右耳</span>
-      <div class="meter-track"><div class="meter-fill" id="meter-r" style="background:var(--ear-r)"></div></div>
+      <div class="meter-track"><div class="meter-fill" id="meter-r" style="background:linear-gradient(90deg,#f43f5e,#fda4af)"></div></div>
     </div>
   </div>
 
-  <!-- 左侧：全局编曲与空间控制台 -->
+  <!-- 左侧：旗舰主控台 -->
   <aside class="panel-left glass-panel">
-    <div>
-      <div class="brand-title">3D 空间编曲工作站 V2</div>
-      <div class="brand-sub">HRTF 双耳声场 · 6 声部和声引擎 · 36 节点</div>
+    <div class="brand-row">
+      <div>
+        <div class="brand-title">AETHER 3D · 空间电音工作站</div>
+        <div style="font-size:10.5px; color:var(--text-muted); margin-top:1px;">22 电子合成音色 · 12 编曲流派 · 36 点 HRTF</div>
+      </div>
+      <span class="brand-badge">PRO V3</span>
     </div>
 
     <button id="btn-play" class="btn-primary">
-      <span>▶</span> 启动空间编曲引擎
+      <span>▶</span> 启动 3D 空间电音引擎
     </button>
 
-    <!-- 音乐风格与和声进行 -->
-    <div>
-      <div class="section-label"><span>音乐编曲风格（含和声演进）</span></div>
+    <!-- 12 大高级编曲流派 + 调性 + 无限变异引擎 -->
+    <div class="control-group">
+      <div class="section-label">
+        <span>编曲流派（12 种电子风格）</span>
+        <span class="seed-tag" id="seed-display">GEN #A104</span>
+      </div>
       <select id="ctrl-style">
-        <option value="cinematic">史诗星际 Cinematic（深邃弦乐感 · 92 BPM）</option>
-        <option value="cyber">赛博霓虹 Synthwave（律动合成器 · 112 BPM）</option>
-        <option value="lofi">微醺爵士 Lo-Fi Chill（温暖电钢 · 84 BPM）</option>
-        <option value="techno">脉冲空间 Melodic Techno（强鼓组 · 124 BPM）</option>
-        <option value="zen">东方空灵 Pentatonic（五声禅意 · 76 BPM）</option>
+        <option value="melodicTechno">01. 旋律铁克诺 Melodic Techno · 126 BPM</option>
+        <option value="cyberpunk">02. 赛博暗潮 Cyberpunk Midtempo · 106 BPM</option>
+        <option value="futureBass">03. 未来低音 Future Bass · 142 BPM</option>
+        <option value="psytrance">04. 迷幻出神 Psytrance · 138 BPM</option>
+        <option value="acidTechno">05. 酸性狂欢 Acid 303 Rave · 134 BPM</option>
+        <option value="progHouse">06. 电音节浩室 Festival Prog House · 128 BPM</option>
+        <option value="dnb">07. 神经鼓打贝斯 Neuro DnB · 170 BPM</option>
+        <option value="synthwave">08. 复古霓虹 Synthwave Outrun · 118 BPM</option>
+        <option value="dubstep">09. 深海重低音 Deep Dubstep · 140 BPM</option>
+        <option value="hyperpop">10. 超载故障 Hyperpop Glitch · 150 BPM</option>
+        <option value="zenTrap">11. 赛博东方 Cyber Zen Trap · 130 BPM</option>
+        <option value="cosmicAmbient">12. 深空史诗 Cosmic Ambient · 94 BPM</option>
       </select>
-    </div>
 
-    <!-- 8 种空间布阵模式 -->
-    <div>
-      <div class="section-label"><span>空间布阵阵型（8 种）</span></div>
-      <div class="grid-2" id="preset-grid">
-        <button class="btn-chip active" data-preset="nebula">球面星云全景</button>
-        <button class="btn-chip" data-preset="ears">双耳贴耳环绕</button>
-        <button class="btn-chip" data-preset="rings">远近纵深梯队</button>
-        <button class="btn-chip" data-preset="helix">DNA 螺旋上升</button>
-        <button class="btn-chip" data-preset="hall">交响音乐厅</button>
-        <button class="btn-chip" data-preset="dome">头顶苍穹穹顶</button>
-        <button class="btn-chip" data-preset="cross">双环交叉对冲</button>
-        <button class="btn-chip" data-preset="matrix">HRTF 点位矩阵</button>
+      <div class="grid-2" style="margin-top:2px;">
+        <select id="ctrl-root" title="根音调性">
+          <option value="0">根音 C</option>
+          <option value="1">根音 C#</option>
+          <option value="2">根音 D</option>
+          <option value="3">根音 Eb</option>
+          <option value="4">根音 E</option>
+          <option value="5">根音 F</option>
+          <option value="6">根音 F#</option>
+          <option value="7">根音 G</option>
+          <option value="8">根音 Ab</option>
+          <option value="9" selected>根音 A</option>
+          <option value="10">根音 Bb</option>
+          <option value="11">根音 B</option>
+        </select>
+        <select id="ctrl-scale" title="音阶情绪">
+          <option value="minor" selected>自然小调 Minor</option>
+          <option value="phrygian">暗黑弗里吉亚 Phrygian</option>
+          <option value="dorian">律动多利亚 Dorian</option>
+          <option value="harmonic">中东神秘 Harmonic</option>
+          <option value="lydian">星际史诗 Lydian</option>
+          <option value="pentatonic">东方五声 Pentatonic</option>
+        </select>
+      </div>
+
+      <div class="grid-2" style="margin-top:2px;">
+        <button class="btn-mutate" id="btn-mutate">⚡ 无限变异基因</button>
+        <button class="btn-mutate" id="btn-remix" style="border-color:rgba(56,189,248,0.55); background:linear-gradient(135deg,rgba(14,165,233,0.32),rgba(16,185,129,0.28));">🎲 跨界风格混搭</button>
       </div>
     </div>
 
-    <!-- 核心空间几何全局滑块（新增全局距离缩放、高度跨度、转速！） -->
+    <!-- 8 种空间布阵 -->
+    <div>
+      <div class="section-label"><span>3D 空间布阵阵型（8 种）</span></div>
+      <div class="grid-2" id="preset-grid">
+        <button class="btn-chip active" data-preset="nebula">球面星云全景</button>
+        <button class="btn-chip" data-preset="ears">双耳贴耳环绕</button>
+        <button class="btn-chip" data-preset="rings">远近三层梯队</button>
+        <button class="btn-chip" data-preset="helix">DNA 双螺旋</button>
+        <button class="btn-chip" data-preset="hall">电音节主舞台</button>
+        <button class="btn-chip" data-preset="dome">头顶苍穹穹顶</button>
+        <button class="btn-chip" data-preset="cross">双环倾斜对冲</button>
+        <button class="btn-chip" data-preset="matrix">HRTF 精准矩阵</button>
+      </div>
+    </div>
+
+    <!-- 电音核心母带与泵感滑块 -->
     <div class="control-group">
-      <div class="section-label" style="margin-bottom:0;"><span>空间几何与远近控制</span></div>
+      <div class="section-label" style="margin-bottom:0;"><span>电音能量与母带效果器</span></div>
 
       <div class="slider-row">
         <div class="slider-header">
-          <span>全局距离缩放（远近推拉）</span>
+          <span>侧链抽吸 Sidechain Pump</span>
+          <strong id="val-pump">68%</strong>
+        </div>
+        <input type="range" class="hot" id="ctrl-pump" min="0" max="100" step="1" value="68" />
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span>电子过载饱和 Drive</span>
+          <strong id="val-drive">34%</strong>
+        </div>
+        <input type="range" class="hot" id="ctrl-drive" min="0" max="100" step="1" value="34" />
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span>主滤波器明亮度 Cutoff</span>
+          <strong id="val-cutoff">13.5 kHz</strong>
+        </div>
+        <input type="range" class="purple" id="ctrl-cutoff" min="400" max="18500" step="100" value="13500" />
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span>303 酸性共振 Resonance</span>
+          <strong id="val-reso">42%</strong>
+        </div>
+        <input type="range" class="purple" id="ctrl-reso" min="0" max="100" step="1" value="42" />
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span>大厅空间混响 Reverb</span>
+          <strong id="val-reverb">38%</strong>
+        </div>
+        <input type="range" class="purple" id="ctrl-reverb" min="0" max="100" step="1" value="38" />
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span>立体声乒乓延迟 Delay</span>
+          <strong id="val-delay">30%</strong>
+        </div>
+        <input type="range" class="purple" id="ctrl-delay" min="0" max="85" step="1" value="30" />
+      </div>
+    </div>
+
+    <!-- 全局空间几何与远近推拉进度条 -->
+    <div class="control-group">
+      <div class="section-label" style="margin-bottom:0;"><span>全局空间几何与速度</span></div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span>全局距离缩放（贴耳 ↔ 远场）</span>
           <strong id="val-scale">1.00x</strong>
         </div>
-        <input type="range" id="ctrl-scale" min="0.35" max="2.30" step="0.02" value="1.00" />
+        <input type="range" id="ctrl-scale" min="0.35" max="2.40" step="0.02" value="1.00" />
       </div>
 
       <div class="slider-row">
@@ -621,10 +785,10 @@
 
       <div class="slider-row">
         <div class="slider-header">
-          <span>声场环绕转速</span>
-          <strong id="val-orbit-speed">1.0x</strong>
+          <span>声源公转环绕速度</span>
+          <strong id="val-orbit-speed">1.1x</strong>
         </div>
-        <input type="range" id="ctrl-orbit-speed" min="0" max="3.0" step="0.1" value="1.0" />
+        <input type="range" id="ctrl-orbit-speed" min="0" max="3.5" step="0.1" value="1.1" />
       </div>
 
       <div class="slider-row">
@@ -637,88 +801,67 @@
 
       <div class="slider-row">
         <div class="slider-header">
-          <span>距离衰减陡峭度 Rolloff</span>
-          <strong id="val-rolloff">1.3</strong>
+          <span>律动复杂度 Groove Density</span>
+          <strong id="val-groove">70%</strong>
         </div>
-        <input type="range" id="ctrl-rolloff" min="0.3" max="3.2" step="0.1" value="1.3" />
-      </div>
-    </div>
-
-    <!-- 空间效果器与主控 -->
-    <div class="control-group">
-      <div class="section-label" style="margin-bottom:0;"><span>空间混响与音色主控</span></div>
-
-      <div class="slider-row">
-        <div class="slider-header">
-          <span>大厅混响湿度 Reverb</span>
-          <strong id="val-reverb">48%</strong>
-        </div>
-        <input type="range" id="ctrl-reverb" min="0" max="100" step="1" value="48" />
+        <input type="range" id="ctrl-groove" min="20" max="100" step="2" value="70" />
       </div>
 
       <div class="slider-row">
         <div class="slider-header">
-          <span>乒乓空间延迟 Delay</span>
-          <strong id="val-delay">32%</strong>
+          <span>距离衰减系数 Rolloff</span>
+          <strong id="val-rolloff">1.2</strong>
         </div>
-        <input type="range" id="ctrl-delay" min="0" max="85" step="1" value="32" />
-      </div>
-
-      <div class="slider-row">
-        <div class="slider-header">
-          <span>全局音色明亮度 Filter</span>
-          <strong id="val-cutoff">12.0 kHz</strong>
-        </div>
-        <input type="range" id="ctrl-cutoff" min="600" max="18000" step="100" value="12000" />
+        <input type="range" id="ctrl-rolloff" min="0.3" max="3.2" step="0.1" value="1.2" />
       </div>
 
       <div class="slider-row">
         <div class="slider-header">
           <span>节拍速度 BPM</span>
-          <strong id="val-bpm">92</strong>
+          <strong id="val-bpm">126</strong>
         </div>
-        <input type="range" id="ctrl-bpm" min="60" max="150" step="1" value="92" />
+        <input type="range" id="ctrl-bpm" min="70" max="180" step="1" value="126" />
       </div>
 
       <div class="slider-row">
         <div class="slider-header">
-          <span>总音量 Master</span>
-          <strong id="val-master">80%</strong>
+          <span>主控总音量 Master</span>
+          <strong id="val-master">82%</strong>
         </div>
-        <input type="range" id="ctrl-master" min="0" max="100" step="1" value="80" />
+        <input type="range" id="ctrl-master" min="0" max="100" step="1" value="82" />
       </div>
     </div>
 
-    <!-- 核心开关 -->
+    <!-- 开关 -->
     <div class="control-group">
       <div class="toggle-row">
-        <span>HRTF 双耳头部渲染</span>
+        <span>HRTF 双耳头部建模</span>
         <div class="switch on" id="sw-hrtf"></div>
       </div>
       <div class="toggle-row">
-        <span>视角转动 = 转动头部</span>
+        <span>转动视角 = 转动你的头</span>
         <div class="switch" id="sw-follow"></div>
       </div>
       <div class="toggle-row">
-        <span>自动和声转调演进</span>
-        <div class="switch on" id="sw-prog"></div>
+        <span>双耳声波能量射线</span>
+        <div class="switch on" id="sw-beams"></div>
       </div>
     </div>
 
     <div class="grid-2">
-      <button class="btn-chip" id="btn-randomize">随机空间重组</button>
+      <button class="btn-chip" id="btn-randomize">随机空间坐标</button>
       <button class="btn-chip" id="btn-reset-cam">重置观察视角</button>
     </div>
   </aside>
 
-  <!-- 右侧：单点声源微调检视器 -->
+  <!-- 右侧：单点 22 音色与精细坐标调节 -->
   <aside class="panel-right glass-panel">
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <div class="node-badge">
         <span class="node-color-dot" id="sel-dot" style="background:#38bdf8"></span>
         <span id="sel-title">声源 #01</span>
       </div>
-      <span id="sel-role-tag" style="font-size:11px; color:var(--accent); font-weight:600;">主音 Lead</span>
+      <span id="sel-role-tag" style="font-size:11px; color:var(--accent); font-weight:700;">主音 Lead</span>
     </div>
 
     <div class="coord-grid">
@@ -736,58 +879,20 @@
       </div>
     </div>
 
+    <!-- 22 种高级音色选择器 -->
     <div class="control-group">
-      <div class="slider-row">
-        <div class="slider-header">
-          <span>单点音量</span>
-          <strong id="val-node-vol">75%</strong>
-        </div>
-        <input type="range" id="ctrl-node-vol" min="0" max="100" step="1" value="75" />
-      </div>
+      <div class="section-label" style="margin-bottom:0;"><span>单点音色合成器（22 种可选）</span></div>
+      <select id="ctrl-node-timbre"></select>
 
-      <div class="slider-row">
-        <div class="slider-header">
-          <span>单点基准距离</span>
-          <strong id="val-node-dist">2.4m</strong>
-        </div>
-        <input type="range" id="ctrl-node-dist" min="0.7" max="6.5" step="0.05" value="2.4" />
-      </div>
-
-      <div class="slider-row">
-        <div class="slider-header">
-          <span>水平方位角</span>
-          <strong id="val-node-az">0°</strong>
-        </div>
-        <input type="range" id="ctrl-node-az" min="-180" max="180" step="1" value="0" />
-      </div>
-
-      <div class="slider-row">
-        <div class="slider-header">
-          <span>垂直仰角</span>
-          <strong id="val-node-el">0°</strong>
-        </div>
-        <input type="range" id="ctrl-node-el" min="-75" max="75" step="1" value="0" />
-      </div>
-
-      <div class="slider-row">
-        <div class="slider-header">
-          <span>单点公转速度</span>
-          <strong id="val-node-orbit">12°/s</strong>
-        </div>
-        <input type="range" id="ctrl-node-orbit" min="-45" max="45" step="1" value="12" />
-      </div>
-    </div>
-
-    <div class="control-group">
-      <div class="slider-row">
-        <div class="slider-header"><span>所属乐器声部</span></div>
+      <div class="slider-row" style="margin-top:2px;">
+        <div class="slider-header"><span>所属混音声部</span></div>
         <select id="ctrl-node-role">
           <option value="drums">鼓组律动 Drums</option>
-          <option value="bass">低频贝斯 Bass</option>
-          <option value="pad">空间铺底 Pad</option>
-          <option value="arp">环绕琶音 Arp</option>
-          <option value="lead">主音晶铃 Lead</option>
-          <option value="fx">高空星尘 FX</option>
+          <option value="bass">超重贝斯 Bass</option>
+          <option value="pad">电音铺底 Pad</option>
+          <option value="arp">高速琶音 Arp</option>
+          <option value="lead">切割主音 Lead</option>
+          <option value="fx">激光特效 FX</option>
         </select>
       </div>
 
@@ -796,16 +901,68 @@
           <span>单点音高偏移（八度）</span>
           <strong id="val-node-oct">0</strong>
         </div>
-        <input type="range" id="ctrl-node-oct" min="-1" max="1" step="1" value="0" />
+        <input type="range" id="ctrl-node-oct" min="-1" max="2" step="1" value="0" />
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span>欧几里得触发密度</span>
+          <strong id="val-node-density">4 / 16</strong>
+        </div>
+        <input type="range" id="ctrl-node-density" min="1" max="16" step="1" value="4" />
+      </div>
+    </div>
+
+    <!-- 单点三维坐标与音量 -->
+    <div class="control-group">
+      <div class="slider-row">
+        <div class="slider-header">
+          <span>该点独立音量</span>
+          <strong id="val-node-vol">80%</strong>
+        </div>
+        <input type="range" id="ctrl-node-vol" min="0" max="100" step="1" value="80" />
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span>基准距离 (米)</span>
+          <strong id="val-node-dist">2.4m</strong>
+        </div>
+        <input type="range" id="ctrl-node-dist" min="0.65" max="6.5" step="0.05" value="2.4" />
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span>水平环绕方位角</span>
+          <strong id="val-node-az">0°</strong>
+        </div>
+        <input type="range" id="ctrl-node-az" min="-180" max="180" step="1" value="0" />
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span>垂直高度仰角</span>
+          <strong id="val-node-el">0°</strong>
+        </div>
+        <input type="range" id="ctrl-node-el" min="-78" max="78" step="1" value="0" />
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span>单点公转速度</span>
+          <strong id="val-node-orbit">12°/s</strong>
+        </div>
+        <input type="range" id="ctrl-node-orbit" min="-55" max="55" step="1" value="12" />
       </div>
     </div>
 
     <div>
-      <div class="section-label"><span>快速拉到耳边测试</span></div>
-      <div class="grid-3">
-        <button class="btn-chip" id="btn-snap-l">贴近左耳</button>
-        <button class="btn-chip" id="btn-snap-f">正前方</button>
-        <button class="btn-chip" id="btn-snap-r">贴近右耳</button>
+      <div class="section-label"><span>一键贴耳测试定位</span></div>
+      <div class="grid-4">
+        <button class="btn-chip" id="btn-snap-l">左耳</button>
+        <button class="btn-chip" id="btn-snap-f">正前</button>
+        <button class="btn-chip" id="btn-snap-r">右耳</button>
+        <button class="btn-chip" id="btn-snap-t">头顶</button>
       </div>
     </div>
 
@@ -813,22 +970,31 @@
       <button class="btn-chip" id="btn-node-solo">独奏 Solo</button>
       <button class="btn-chip" id="btn-node-mute">静音 Mute</button>
     </div>
-    <button class="btn-chip" id="btn-node-ping" style="border-color:rgba(56,189,248,0.5);">立即试听该点位 (Ping)</button>
+    <button class="btn-chip" id="btn-node-ping" style="border-color:rgba(56,189,248,0.65); background:rgba(56,189,248,0.14); font-weight:700;">🔊 立即试听该音色点位</button>
   </aside>
 
-  <!-- 底部：和弦进度条 + 6 声部一键混音台 -->
+  <!-- 底部：现场能量段落 + 16 步进 + 6 声部一键混音 -->
   <div class="bottom-dock glass-panel">
     <div class="dock-top">
-      <div class="chord-pill" id="chord-display">Am9</div>
+      <div class="chord-pill" id="chord-display">Am9 · DROP</div>
       <div class="step-bar" id="step-bar"></div>
     </div>
-    <div class="stem-row" id="stem-mixer">
-      <button class="stem-btn" data-stem="drums"><span class="stem-dot" style="background:#f59e0b"></span>鼓组 Drums</button>
-      <button class="stem-btn" data-stem="bass"><span class="stem-dot" style="background:#ec4899"></span>贝斯 Bass</button>
-      <button class="stem-btn" data-stem="pad"><span class="stem-dot" style="background:#10b981"></span>铺底 Pad</button>
-      <button class="stem-btn" data-stem="arp"><span class="stem-dot" style="background:#a855f7"></span>琶音 Arp</button>
-      <button class="stem-btn" data-stem="lead"><span class="stem-dot" style="background:#38bdf8"></span>主音 Lead</button>
-      <button class="stem-btn" data-stem="fx"><span class="stem-dot" style="background:#e2e8f0"></span>星尘 FX</button>
+    <div class="dock-mid">
+      <div class="energy-bar" id="energy-bar">
+        <button class="energy-btn" data-energy="break">BREAK 空灵</button>
+        <button class="energy-btn" data-energy="groove">GROOVE 律动</button>
+        <button class="energy-btn" data-energy="build">BUILD 爬升</button>
+        <button class="energy-btn active" data-energy="drop">🔥 DROP 高潮</button>
+        <button class="energy-btn" id="btn-autodj">AUTO DJ</button>
+      </div>
+      <div class="stem-row" id="stem-mixer">
+        <button class="stem-btn" data-stem="drums"><span class="stem-dot" style="background:#f59e0b"></span>鼓组</button>
+        <button class="stem-btn" data-stem="bass"><span class="stem-dot" style="background:#ec4899"></span>贝斯</button>
+        <button class="stem-btn" data-stem="pad"><span class="stem-dot" style="background:#10b981"></span>铺底</button>
+        <button class="stem-btn" data-stem="arp"><span class="stem-dot" style="background:#a855f7"></span>琶音</button>
+        <button class="stem-btn" data-stem="lead"><span class="stem-dot" style="background:#38bdf8"></span>主音</button>
+        <button class="stem-btn" data-stem="fx"><span class="stem-dot" style="background:#e2e8f0"></span>特效</button>
+      </div>
     </div>
   </div>
 
@@ -845,77 +1011,45 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    // =========================================================
-    // 1. 乐理与 5 套风格和声进行库（MIDI -> 频率）
-    // =========================================================
+    // =========================================================================
+    // 1. 乐理、22 种高级电子音色定义 & 12 大电子流派库
+    // =========================================================================
     const midiToFreq = (m) => 440 * Math.pow(2, (m - 69) / 12);
 
-    const STYLES = {
-      cinematic: {
-        name: '史诗星际',
-        bpm: 92,
-        chords: [
-          { name: 'Am9',   bass: 45, pad: [57, 60, 64, 67, 71], arp: [69, 71, 72, 76, 79, 83] },
-          { name: 'Fmaj7', bass: 41, pad: [53, 57, 60, 64, 69], arp: [65, 69, 72, 76, 77, 81] },
-          { name: 'Cmaj9', bass: 48, pad: [55, 60, 62, 64, 71], arp: [67, 71, 72, 74, 76, 79] },
-          { name: 'G6',    bass: 43, pad: [55, 59, 62, 64, 67], arp: [67, 71, 74, 76, 79, 83] }
-        ],
-        kickSteps:  [0, 6, 8, 14],
-        snareSteps: [4, 12],
-        hatSteps:   [0, 2, 4, 6, 8, 10, 12, 14, 15]
-      },
-      cyber: {
-        name: '赛博霓虹',
-        bpm: 112,
-        chords: [
-          { name: 'Cm9',    bass: 36, pad: [48, 55, 58, 62, 63], arp: [60, 63, 67, 70, 74, 75] },
-          { name: 'Abmaj7', bass: 44, pad: [56, 60, 63, 67, 72], arp: [63, 67, 68, 72, 75, 79] },
-          { name: 'Ebmaj7', bass: 39, pad: [51, 55, 58, 62, 67], arp: [62, 63, 67, 70, 74, 79] },
-          { name: 'Bbadd9', bass: 46, pad: [53, 58, 60, 62, 65], arp: [62, 65, 70, 72, 74, 77] }
-        ],
-        kickSteps:  [0, 3, 4, 8, 10, 12],
-        snareSteps: [4, 12],
-        hatSteps:   [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-      },
-      lofi: {
-        name: '微醺爵士',
-        bpm: 84,
-        chords: [
-          { name: 'Dm9',   bass: 38, pad: [50, 57, 60, 64, 65], arp: [62, 65, 69, 72, 76, 77] },
-          { name: 'G13',   bass: 43, pad: [53, 59, 64, 69, 71], arp: [64, 67, 71, 74, 76, 79] },
-          { name: 'Cmaj9', bass: 36, pad: [52, 55, 59, 62, 67], arp: [64, 67, 71, 74, 76, 83] },
-          { name: 'A7b9',  bass: 45, pad: [55, 58, 61, 64, 69], arp: [64, 67, 69, 73, 76, 81] }
-        ],
-        kickSteps:  [0, 7, 10],
-        snareSteps: [4, 12],
-        hatSteps:   [0, 2, 4, 6, 8, 10, 12, 14]
-      },
-      techno: {
-        name: '脉冲空间',
-        bpm: 124,
-        chords: [
-          { name: 'Fm9',    bass: 41, pad: [53, 56, 60, 63, 67], arp: [65, 68, 72, 75, 79, 80] },
-          { name: 'Dbmaj7', bass: 37, pad: [49, 53, 56, 60, 65], arp: [61, 65, 68, 72, 77, 80] },
-          { name: 'Ebsus4', bass: 39, pad: [51, 56, 58, 63, 67], arp: [63, 68, 70, 75, 77, 82] },
-          { name: 'Cm7',    bass: 36, pad: [48, 55, 58, 63, 67], arp: [60, 67, 70, 75, 79, 82] }
-        ],
-        kickSteps:  [0, 4, 8, 12],
-        snareSteps: [4, 12],
-        hatSteps:   [2, 3, 6, 7, 10, 11, 14, 15]
-      },
-      zen: {
-        name: '东方空灵',
-        bpm: 76,
-        chords: [
-          { name: 'Dadd9', bass: 38, pad: [50, 57, 62, 64, 66], arp: [66, 69, 74, 76, 78, 81] },
-          { name: 'Bm7',   bass: 47, pad: [54, 57, 59, 62, 66], arp: [66, 69, 71, 74, 78, 83] },
-          { name: 'Gmaj9', bass: 43, pad: [55, 59, 62, 66, 69], arp: [67, 71, 74, 78, 81, 86] },
-          { name: 'Asus4', bass: 45, pad: [52, 57, 62, 64, 69], arp: [69, 71, 74, 76, 81, 86] }
-        ],
-        kickSteps:  [0, 10],
-        snareSteps: [8],
-        hatSteps:   [0, 4, 8, 12]
-      }
+    const NOTE_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
+    const SCALES = {
+      minor:      [0, 2, 3, 5, 7, 8, 10],
+      phrygian:   [0, 1, 3, 5, 7, 8, 10],
+      dorian:     [0, 2, 3, 5, 7, 9, 10],
+      harmonic:   [0, 2, 3, 5, 7, 8, 11],
+      lydian:     [0, 2, 4, 6, 7, 9, 11],
+      pentatonic: [0, 3, 5, 7, 10, 12, 15]
+    };
+
+    // 22 种高级电子音色库
+    const TIMBRES = {
+      kick909:     { name: '01. 909 硬核底鼓 (Punch Kick)',   group: 'drums' },
+      kick808:     { name: '02. 808 超重低频鼓 (Sub 808)',    group: 'drums' },
+      clap909:     { name: '03. 909 立体声拍手 (EDM Clap)',   group: 'drums' },
+      snareNeuro:  { name: '04. 神经机械脆军鼓 (Neuro Snare)', group: 'drums' },
+      hatCrisp:    { name: '05. 909 金属高频踩镲 (Hi-Hat)',    group: 'drums' },
+      percFM:      { name: '06. 工业金属脉冲打击 (FM Perc)',   group: 'drums' },
+      acid303:     { name: '07. TB-303 酸性滑音 (Acid 303)',   group: 'bass' },
+      reeseBass:   { name: '08. Reese 撕裂宽频贝斯 (Reese)',   group: 'bass' },
+      wobbleBass:  { name: '09. Dubstep 震荡贝斯 (Wobble)',    group: 'bass' },
+      fmDonk:      { name: '10. 弹跳 FM 金属贝斯 (FM Donk)',   group: 'bass' },
+      neuroBass:   { name: '11. 赛博咆哮扭曲贝斯 (Neuro)',     group: 'bass' },
+      subBoom:     { name: '12. 胸腔核弹超低频 (Sub Boom)',    group: 'bass' },
+      supersaw:    { name: '13. 7层电音节锯齿 (Supersaw)',     group: 'pad' },
+      futureChord: { name: '14. Future Bass 脉冲和弦 (Swell)', group: 'pad' },
+      cyberPad:    { name: '15. 银翼杀手铜管铺底 (Cyber Pad)', group: 'pad' },
+      choirSynth:  { name: '16. 虚空合成人声垫 (Void Choir)',  group: 'pad' },
+      trancePluck: { name: '17. 迷幻锐利电音拨弦 (Pluck)',     group: 'arp' },
+      cyberArp:    { name: '18. 赛博方波门控琶音 (Gate Arp)',  group: 'arp' },
+      laserLead:   { name: '19. 激光切割电子主音 (Laser)',     group: 'lead' },
+      hoover:      { name: '20. 经典 Rave 狂欢吸尘器 (Hoover)', group: 'lead' },
+      bellFM:      { name: '21. 冰晶 DX7 金属钟 (FM Bell)',    group: 'lead' },
+      glitchFx:    { name: '22. 科幻故障电火花 (Glitch FX)',   group: 'fx' }
     };
 
     const ROLE_META = {
@@ -924,32 +1058,140 @@
       pad:   { label: '铺底 Pad',   color: 0x10b981 },
       arp:   { label: '琶音 Arp',   color: 0xa855f7 },
       lead:  { label: '主音 Lead',  color: 0x38bdf8 },
-      fx:    { label: '星尘 FX',    color: 0xe2e8f0 }
+      fx:    { label: '特效 FX',    color: 0xe2e8f0 }
+    };
+
+    // 12 套高级电子编曲流派
+    const STYLES = {
+      melodicTechno: {
+        name: '旋律铁克诺', bpm: 126, root: 9, scale: 'minor', prog: [0, 5, 3, 4],
+        pump: 0.72, drive: 0.36, reso: 0.45,
+        kick: [0, 4, 8, 12], snare: [4, 12], hat: [2, 3, 6, 7, 10, 11, 14, 15],
+        bassSteps: [0, 2, 3, 6, 8, 10, 11, 14],
+        palette: { drums: ['kick909','clap909','hatCrisp','percFM'], bass: ['reeseBass','acid303','subBoom'], pad: ['cyberPad','supersaw'], arp: ['trancePluck','cyberArp'], lead: ['laserLead','bellFM'], fx: ['glitchFx','percFM'] }
+      },
+      cyberpunk: {
+        name: '赛博暗潮', bpm: 106, root: 4, scale: 'phrygian', prog: [0, 1, 0, 5],
+        pump: 0.78, drive: 0.65, reso: 0.52,
+        kick: [0, 3, 8, 10, 11], snare: [4, 12], hat: [0, 2, 4, 6, 8, 10, 12, 14],
+        bassSteps: [0, 2, 4, 6, 8, 10, 12, 15],
+        palette: { drums: ['kick909','snareNeuro','hatCrisp','percFM'], bass: ['neuroBass','reeseBass','subBoom'], pad: ['cyberPad','choirSynth'], arp: ['cyberArp','acid303'], lead: ['hoover','laserLead'], fx: ['glitchFx','laserLead'] }
+      },
+      futureBass: {
+        name: '未来低音', bpm: 142, root: 5, scale: 'minor', prog: [5, 6, 0, 2],
+        pump: 0.85, drive: 0.28, reso: 0.35,
+        kick: [0, 6, 10], snare: [8], hat: [0, 2, 3, 4, 6, 7, 8, 10, 12, 14, 15],
+        bassSteps: [0, 6, 10, 14],
+        palette: { drums: ['kick808','clap909','hatCrisp','snareNeuro'], bass: ['subBoom','wobbleBass','fmDonk'], pad: ['futureChord','supersaw'], arp: ['trancePluck','bellFM'], lead: ['supersaw','bellFM'], fx: ['glitchFx','bellFM'] }
+      },
+      psytrance: {
+        name: '迷幻出神', bpm: 138, root: 6, scale: 'phrygian', prog: [0, 0, 1, 0],
+        pump: 0.68, drive: 0.44, reso: 0.75,
+        kick: [0, 4, 8, 12], snare: [4, 12], hat: [2, 6, 10, 14],
+        bassSteps: [1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15],
+        palette: { drums: ['kick909','hatCrisp','percFM','clap909'], bass: ['acid303','fmDonk','subBoom'], pad: ['choirSynth','cyberPad'], arp: ['acid303','cyberArp'], lead: ['laserLead','hoover'], fx: ['glitchFx','laserLead'] }
+      },
+      acidTechno: {
+        name: '酸性 303', bpm: 134, root: 2, scale: 'phrygian', prog: [0, 0, 3, 1],
+        pump: 0.76, drive: 0.62, reso: 0.88,
+        kick: [0, 4, 8, 12], snare: [4, 12, 15], hat: [0, 2, 4, 6, 8, 10, 12, 14],
+        bassSteps: [0, 1, 3, 6, 8, 10, 12, 13, 15],
+        palette: { drums: ['kick909','clap909','hatCrisp','percFM'], bass: ['acid303','neuroBass','subBoom'], pad: ['cyberPad','hoover'], arp: ['acid303','cyberArp'], lead: ['acid303','hoover'], fx: ['glitchFx','percFM'] }
+      },
+      progHouse: {
+        name: '电音节浩室', bpm: 128, root: 0, scale: 'minor', prog: [5, 3, 0, 4],
+        pump: 0.82, drive: 0.25, reso: 0.30,
+        kick: [0, 4, 8, 12], snare: [4, 12], hat: [2, 6, 10, 14, 15],
+        bassSteps: [0, 3, 6, 8, 11, 14],
+        palette: { drums: ['kick909','clap909','hatCrisp','percFM'], bass: ['fmDonk','subBoom','reeseBass'], pad: ['supersaw','futureChord'], arp: ['trancePluck','bellFM'], lead: ['supersaw','trancePluck'], fx: ['glitchFx','bellFM'] }
+      },
+      dnb: {
+        name: '神经鼓打贝斯', bpm: 170, root: 7, scale: 'minor', prog: [0, 5, 3, 6],
+        pump: 0.58, drive: 0.55, reso: 0.48,
+        kick: [0, 10], snare: [4, 12], hat: [0, 2, 4, 6, 8, 10, 12, 14],
+        bassSteps: [0, 3, 6, 10, 13],
+        palette: { drums: ['kick808','snareNeuro','hatCrisp','percFM'], bass: ['reeseBass','neuroBass','subBoom'], pad: ['cyberPad','choirSynth'], arp: ['cyberArp','trancePluck'], lead: ['laserLead','bellFM'], fx: ['glitchFx','hoover'] }
+      },
+      synthwave: {
+        name: '复古霓虹', bpm: 118, root: 9, scale: 'minor', prog: [0, 5, 2, 4],
+        pump: 0.65, drive: 0.32, reso: 0.38,
+        kick: [0, 4, 8, 12], snare: [4, 12], hat: [0, 2, 4, 6, 8, 10, 12, 14],
+        bassSteps: [0, 2, 4, 6, 8, 10, 12, 14],
+        palette: { drums: ['kick909','snareNeuro','hatCrisp','clap909'], bass: ['reeseBass','acid303','subBoom'], pad: ['supersaw','cyberPad'], arp: ['trancePluck','cyberArp'], lead: ['laserLead','supersaw'], fx: ['bellFM','glitchFx'] }
+      },
+      dubstep: {
+        name: '深海重低音', bpm: 140, root: 5, scale: 'phrygian', prog: [0, 1, 5, 4],
+        pump: 0.72, drive: 0.70, reso: 0.65,
+        kick: [0, 10], snare: [8], hat: [0, 4, 6, 8, 12, 14],
+        bassSteps: [0, 2, 4, 8, 10, 12, 14],
+        palette: { drums: ['kick808','snareNeuro','hatCrisp','percFM'], bass: ['wobbleBass','neuroBass','subBoom'], pad: ['cyberPad','choirSynth'], arp: ['cyberArp','acid303'], lead: ['hoover','laserLead'], fx: ['glitchFx','wobbleBass'] }
+      },
+      hyperpop: {
+        name: '超载故障', bpm: 150, root: 3, scale: 'lydian', prog: [0, 4, 5, 3],
+        pump: 0.80, drive: 0.58, reso: 0.50,
+        kick: [0, 3, 6, 8, 11, 14], snare: [4, 12], hat: [0, 1, 2, 4, 6, 7, 8, 10, 12, 13, 14, 15],
+        bassSteps: [0, 3, 6, 8, 11, 14],
+        palette: { drums: ['kick808','clap909','hatCrisp','percFM'], bass: ['fmDonk','neuroBass','subBoom'], pad: ['supersaw','futureChord'], arp: ['bellFM','cyberArp'], lead: ['laserLead','bellFM'], fx: ['glitchFx','laserLead'] }
+      },
+      zenTrap: {
+        name: '赛博东方', bpm: 130, root: 2, scale: 'pentatonic', prog: [0, 3, 4, 2],
+        pump: 0.66, drive: 0.35, reso: 0.40,
+        kick: [0, 3, 10], snare: [8], hat: [0, 2, 3, 4, 6, 8, 10, 11, 12, 14, 15],
+        bassSteps: [0, 3, 10, 13],
+        palette: { drums: ['kick808','clap909','hatCrisp','percFM'], bass: ['subBoom','reeseBass','fmDonk'], pad: ['choirSynth','cyberPad'], arp: ['trancePluck','bellFM'], lead: ['bellFM','laserLead'], fx: ['glitchFx','bellFM'] }
+      },
+      cosmicAmbient: {
+        name: '深空史诗', bpm: 94, root: 9, scale: 'lydian', prog: [0, 5, 2, 4],
+        pump: 0.35, drive: 0.14, reso: 0.25,
+        kick: [0, 6, 10], snare: [4, 12], hat: [0, 4, 8, 12],
+        bassSteps: [0, 8],
+        palette: { drums: ['kick808','clap909','hatCrisp','percFM'], bass: ['subBoom','reeseBass'], pad: ['choirSynth','cyberPad','supersaw'], arp: ['trancePluck','bellFM'], lead: ['bellFM','supersaw'], fx: ['glitchFx','bellFM'] }
+      }
     };
 
     const MAX_NODES = 36;
     const state = {
       isPlaying: false,
-      style: 'cinematic',
+      style: 'melodicTechno',
+      rhythmStyle: 'melodicTechno', // 支持跨界混搭
+      root: 9,
+      scale: 'minor',
+      prog: [0, 5, 3, 4],
+      energy: 'drop', // break | groove | build | drop
+      autoDJ: false,
       preset: 'nebula',
       activeCount: 32,
       globalScale: 1.0,
       heightSpread: 1.0,
-      orbitMult: 1.0,
-      rolloff: 1.3,
-      reverbMix: 0.48,
-      delayMix: 0.32,
-      cutoff: 12000,
-      bpm: 92,
-      masterGain: 0.80,
+      orbitMult: 1.1,
+      grooveDensity: 0.70,
+      rolloff: 1.2,
+      pump: 0.68,
+      drive: 0.34,
+      cutoff: 13500,
+      reso: 0.42,
+      reverbMix: 0.38,
+      delayMix: 0.30,
+      bpm: 126,
+      masterGain: 0.82,
       useHRTF: true,
       followCamera: false,
-      autoProgression: true,
+      showBeams: true,
       selectedIndex: 0,
       soloIndex: -1,
-      chordIdx: 0,
+      chordStep: 0,
+      seed: 0xA104,
       stems: { drums: true, bass: true, pad: true, arp: true, lead: true, fx: true }
     };
+
+    // 填充右侧 22 种音色下拉框
+    const timbreSelect = document.getElementById('ctrl-node-timbre');
+    Object.entries(TIMBRES).forEach(([key, info]) => {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = info.name;
+      timbreSelect.appendChild(opt);
+    });
 
     // 构建底部 16 步进度条
     const stepBarEl = document.getElementById('step-bar');
@@ -961,20 +1203,82 @@
       stepCells.push(cell);
     }
 
-    // =========================================================
-    // 2. Three.js 场景与 3D 头部模型
-    // =========================================================
+    // 工具：更新滑块进度填充
+    function updateSliderVisual(el) {
+      const min = parseFloat(el.min);
+      const max = parseFloat(el.max);
+      const val = parseFloat(el.value);
+      const pct = ((val - min) / (max - min)) * 100;
+      el.style.setProperty('--pct', `${pct.toFixed(1)}%`);
+    }
+    document.querySelectorAll('input[type="range"]').forEach(el => {
+      updateSliderVisual(el);
+      el.addEventListener('input', () => updateSliderVisual(el));
+    });
+
+    // 欧几里得节奏算法：将 k 个音符均匀分布到 n 步中
+    function buildEuclidMask(k, n = 16, rot = 0) {
+      const mask = new Array(n).fill(false);
+      if (k <= 0) return mask;
+      for (let i = 0; i < n; i++) {
+        if (Math.floor((i * k) / n) !== Math.floor(((i - 1) * k) / n)) {
+          mask[(i + rot) % n] = true;
+        }
+      }
+      return mask;
+    }
+
+    // 根据当前调性、音阶、和弦级数生成音符 MIDI
+    function getScaleMidi(degree, octaveBase = 48) {
+      const sc = SCALES[state.scale];
+      const len = sc.length;
+      const oct = Math.floor(degree / len);
+      const idx = ((degree % len) + len) % len;
+      return octaveBase + state.root + oct * 12 + sc[idx];
+    }
+
+    function getCurrentChordInfo() {
+      const deg = state.prog[state.chordStep % state.prog.length];
+      const sc = SCALES[state.scale];
+      const rootMidi = getScaleMidi(deg, 36);
+      const noteName = NOTE_NAMES[(rootMidi) % 12];
+      const thirdInterval = (sc[(deg + 2) % sc.length] - sc[deg % sc.length] + 12) % 12;
+      const qual = thirdInterval === 3 ? 'm9' : 'maj9';
+      return {
+        label: `${noteName}${qual}`,
+        bass: rootMidi,
+        chord: [
+          getScaleMidi(deg, 48),
+          getScaleMidi(deg + 2, 48),
+          getScaleMidi(deg + 4, 48),
+          getScaleMidi(deg + 6, 48),
+          getScaleMidi(deg + 8, 48)
+        ],
+        arp: [
+          getScaleMidi(deg, 60),
+          getScaleMidi(deg + 2, 60),
+          getScaleMidi(deg + 4, 60),
+          getScaleMidi(deg + 6, 60),
+          getScaleMidi(deg + 7, 60),
+          getScaleMidi(deg + 9, 60)
+        ]
+      };
+    }
+
+    // =========================================================================
+    // 2. Three.js 场景 + 3D 头部模型 + 声波汇聚射线池
+    // =========================================================================
     const container = document.getElementById('canvas-container');
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera(46, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(4.8, 2.8, -6.8);
+    camera.position.set(4.8, 2.7, -6.8);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.toneMappingExposure = 1.18;
     container.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -984,27 +1288,27 @@
     controls.maxDistance = 18;
 
     scene.add(new THREE.AmbientLight(0xdbeafe, 0.85));
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.9);
     keyLight.position.set(4, 7, -5);
     scene.add(keyLight);
 
-    const rimL = new THREE.PointLight(0x22d3ee, 2.8, 14);
+    const rimL = new THREE.PointLight(0x22d3ee, 3.0, 15);
     rimL.position.set(-3.5, 1.2, 2.0);
     scene.add(rimL);
 
-    const rimR = new THREE.PointLight(0xfb7185, 2.6, 14);
+    const rimR = new THREE.PointLight(0xfb7185, 2.8, 15);
     rimR.position.set(3.5, 1.2, 2.0);
     scene.add(rimR);
 
-    // 地面距离参考同心环（随全局距离缩放联动呼吸）
+    // 随底鼓律动呼吸的地面距离参考环
     const floorRings = [];
     [1.5, 3.0, 5.0, 7.0].forEach((r, idx) => {
       const ring = new THREE.Mesh(
-        new THREE.RingGeometry(r - 0.014, r + 0.014, 96),
+        new THREE.RingGeometry(r - 0.015, r + 0.015, 96),
         new THREE.MeshBasicMaterial({
-          color: 0xffffff,
+          color: idx === 0 ? 0x38bdf8 : 0xffffff,
           transparent: true,
-          opacity: 0.2 - idx * 0.035,
+          opacity: 0.24 - idx * 0.04,
           side: THREE.DoubleSide
         })
       );
@@ -1015,13 +1319,17 @@
     });
 
     // 3D 头部与双耳模型（面朝 -Z，左耳 -X，右耳 +X）
+    let headVisorMat = null;
+    const LEFT_EAR_POS = new THREE.Vector3(-0.37, -0.02, 0.02);
+    const RIGHT_EAR_POS = new THREE.Vector3(0.37, -0.02, 0.02);
+
     function createHeadModel() {
       const g = new THREE.Group();
       const skinMat = new THREE.MeshPhysicalMaterial({
-        color: 0xe2e8f0, roughness: 0.3, metalness: 0.14, clearcoat: 0.4, clearcoatRoughness: 0.2
+        color: 0xe2e8f0, roughness: 0.28, metalness: 0.16, clearcoat: 0.45, clearcoatRoughness: 0.18
       });
       const wireMat = new THREE.MeshBasicMaterial({
-        color: 0x38bdf8, wireframe: true, transparent: true, opacity: 0.08
+        color: 0x38bdf8, wireframe: true, transparent: true, opacity: 0.09
       });
 
       const cranium = new THREE.Mesh(new THREE.SphereGeometry(0.42, 40, 32), skinMat);
@@ -1029,7 +1337,7 @@
       cranium.position.set(0, 0.08, 0.02);
       g.add(cranium);
 
-      const wire = new THREE.Mesh(new THREE.SphereGeometry(0.426, 20, 16), wireMat);
+      const wire = new THREE.Mesh(new THREE.SphereGeometry(0.427, 20, 16), wireMat);
       wire.scale.copy(cranium.scale);
       wire.position.copy(cranium.position);
       g.add(wire);
@@ -1053,12 +1361,10 @@
       nose.position.set(0, -0.04, -0.42);
       g.add(nose);
 
-      const visor = new THREE.Mesh(
-        new THREE.TorusGeometry(0.34, 0.055, 16, 48, Math.PI * 0.72),
-        new THREE.MeshPhysicalMaterial({
-          color: 0x0f172a, roughness: 0.1, metalness: 0.88, emissive: 0x0ea5e9, emissiveIntensity: 0.45
-        })
-      );
+      headVisorMat = new THREE.MeshPhysicalMaterial({
+        color: 0x0f172a, roughness: 0.08, metalness: 0.9, emissive: 0x38bdf8, emissiveIntensity: 0.55
+      });
+      const visor = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.056, 16, 48, Math.PI * 0.72), headVisorMat);
       visor.rotation.x = Math.PI / 2;
       visor.rotation.z = -Math.PI * 0.86;
       visor.position.set(0, 0.06, -0.06);
@@ -1072,74 +1378,117 @@
         pinna.rotation.z = -0.35;
         ear.add(pinna);
 
-        const glow = new THREE.Mesh(new THREE.SphereGeometry(0.044, 16, 16), new THREE.MeshBasicMaterial({ color: col }));
+        const glow = new THREE.Mesh(new THREE.SphereGeometry(0.046, 16, 16), new THREE.MeshBasicMaterial({ color: col }));
         glow.position.set(side * 0.015, -0.01, -0.01);
         ear.add(glow);
 
         const ring = new THREE.Mesh(
-          new THREE.RingGeometry(0.13, 0.15, 32),
-          new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.65, side: THREE.DoubleSide })
+          new THREE.RingGeometry(0.13, 0.152, 32),
+          new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.72, side: THREE.DoubleSide })
         );
         ring.rotation.y = Math.PI / 2;
         ear.add(ring);
 
-        ear.position.set(side * 0.37, -0.02, 0.02);
+        ear.position.copy(side < 0 ? LEFT_EAR_POS : RIGHT_EAR_POS);
         return ear;
       }
 
       g.add(buildEar(-1));
       g.add(buildEar(1));
 
-      // 正前方朝向指示线
       const arrowLine = new THREE.Line(
-        new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -0.68, -0.5), new THREE.Vector3(0, -0.68, -2.4)]),
-        new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.55 })
+        new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -0.68, -0.5), new THREE.Vector3(0, -0.68, -2.6)]),
+        new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.6 })
       );
       g.add(arrowLine);
-
       return g;
     }
 
     const headModel = createHeadModel();
     scene.add(headModel);
 
-    // 选中连线
+    // 选中节点连线
     const tetherLine = new THREE.Line(
       new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]),
-      new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55 })
+      new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6 })
     );
     scene.add(tetherLine);
 
-    // =========================================================
-    // 3. Web Audio 立体声混响 + 乒乓延迟 + HRTF 引擎
-    // =========================================================
+    // 声波能量汇聚射线池（零 GC 复用，发声时从声源射向更近的那只耳朵）
+    const BEAM_POOL_SIZE = 16;
+    const beamPool = [];
+    let beamCursor = 0;
+    for (let i = 0; i < BEAM_POOL_SIZE; i++) {
+      const geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+      const mat = new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0 });
+      const line = new THREE.Line(geo, mat);
+      line.visible = false;
+      scene.add(line);
+      beamPool.push({ line, mat, life: 0 });
+    }
+
+    function spawnAcousticBeam(fromPos, colorHex) {
+      if (!state.showBeams) return;
+      const b = beamPool[beamCursor];
+      beamCursor = (beamCursor + 1) % BEAM_POOL_SIZE;
+      const targetEar = fromPos.x < 0 ? LEFT_EAR_POS : RIGHT_EAR_POS;
+      const attr = b.line.geometry.attributes.position;
+      attr.setXYZ(0, fromPos.x, fromPos.y, fromPos.z);
+      attr.setXYZ(1, targetEar.x, targetEar.y, targetEar.z);
+      attr.needsUpdate = true;
+      b.mat.color.setHex(colorHex);
+      b.mat.opacity = 0.55;
+      b.life = 1.0;
+      b.line.visible = true;
+    }
+
+    // =========================================================================
+    // 3. 旗舰 Web Audio DSP 引擎（侧链抽吸 + 电子过载 + 混响 + 乒乓延迟 + HRTF）
+    // =========================================================================
     let audioCtx = null;
+    let drumBus = null;
+    let sidechainBus = null;
     let dryBus = null;
-    let reverbNode = null;
-    let reverbGain = null;
+    let reverbNode = null, reverbGain = null;
     let delayL = null, delayR = null, delayGain = null;
+    let driveNode = null;
     let masterFilter = null;
     let masterComp = null;
     let masterGain = null;
     let analyserL = null, analyserR = null;
     let noiseBuf = null;
+    let kickVisualPulse = 0;
 
-    // 生成顺滑、无金属感的立体声音乐厅混响脉冲 (3.0s)
-    function createLushReverbIR(ctx, duration = 3.0, decay = 2.6) {
+    function makeDriveCurve(amount) {
+      const k = amount * 55;
+      const n = 2048;
+      const curve = new Float32Array(n);
+      if (k < 0.5) {
+        for (let i = 0; i < n; i++) curve[i] = (i * 2) / n - 1;
+        return curve;
+      }
+      const norm = Math.tanh(k * 0.12 + 1);
+      for (let i = 0; i < n; i++) {
+        const x = (i * 2) / n - 1;
+        curve[i] = Math.tanh(x * (1 + k * 0.12)) / norm;
+      }
+      return curve;
+    }
+
+    function createClubReverbIR(ctx, duration = 2.6, decay = 2.5) {
       const rate = ctx.sampleRate;
       const len = Math.floor(rate * duration);
       const buf = ctx.createBuffer(2, len, rate);
       for (let ch = 0; ch < 2; ch++) {
-        const data = buf.getChannelData(ch);
+        const d = buf.getChannelData(ch);
         let lp = 0;
         for (let i = 0; i < len; i++) {
           const t = i / len;
-          const env = Math.pow(1 - t, decay) * Math.min(1, i / (rate * 0.025));
-          const white = Math.random() * 2 - 1;
-          // 随时间推移高频自然滚降，模拟真实大厅空气吸收
-          const coeff = 0.25 + 0.65 * t;
-          lp = lp * coeff + white * (1 - coeff);
-          data[i] = lp * env;
+          const env = Math.pow(1 - t, decay) * Math.min(1, i / (rate * 0.015));
+          const w = Math.random() * 2 - 1;
+          const coeff = 0.2 + 0.68 * t;
+          lp = lp * coeff + w * (1 - coeff);
+          d[i] = lp * env;
         }
       }
       return buf;
@@ -1150,68 +1499,73 @@
       const AC = window.AudioContext || window.webkitAudioContext;
       audioCtx = new AC();
 
-      // 主链路
+      drumBus = audioCtx.createGain();
+      drumBus.gain.value = 1.05;
+
+      sidechainBus = audioCtx.createGain();
+      sidechainBus.gain.value = 1.0;
+
       dryBus = audioCtx.createGain();
       dryBus.gain.value = 1.0;
 
-      // 立体声大厅混响总线
+      drumBus.connect(dryBus);
+      sidechainBus.connect(dryBus);
+
+      // 立体声空间混响
       reverbNode = audioCtx.createConvolver();
-      reverbNode.buffer = createLushReverbIR(audioCtx, 3.2, 2.4);
+      reverbNode.buffer = createClubReverbIR(audioCtx);
       reverbGain = audioCtx.createGain();
-      reverbGain.gain.value = state.reverbMix * 0.85;
+      reverbGain.gain.value = state.reverbMix * 0.78;
       reverbNode.connect(reverbGain);
 
-      // 乒乓延迟总线
+      // 乒乓延迟
       delayL = audioCtx.createDelay(2.0);
       delayR = audioCtx.createDelay(2.0);
-      const fbL = audioCtx.createGain();
-      const fbR = audioCtx.createGain();
-      fbL.gain.value = 0.36;
-      fbR.gain.value = 0.36;
-      const delayFilter = audioCtx.createBiquadFilter();
-      delayFilter.type = 'lowpass';
-      delayFilter.frequency.value = 2800;
-
+      const fbL = audioCtx.createGain(); fbL.gain.value = 0.38;
+      const fbR = audioCtx.createGain(); fbR.gain.value = 0.38;
+      const dFilt = audioCtx.createBiquadFilter();
+      dFilt.type = 'bandpass'; dFilt.frequency.value = 1900; dFilt.Q.value = 0.7;
       const merger = audioCtx.createChannelMerger(2);
       delayGain = audioCtx.createGain();
-      delayGain.gain.value = state.delayMix * 0.65;
+      delayGain.gain.value = state.delayMix * 0.6;
 
-      delayL.connect(delayFilter);
-      delayFilter.connect(fbL);
-      fbL.connect(delayR);
-      delayR.connect(fbR);
-      fbR.connect(delayL);
-
+      delayL.connect(dFilt); dFilt.connect(fbL); fbL.connect(delayR);
+      delayR.connect(fbR); fbR.connect(delayL);
       delayL.connect(merger, 0, 0);
       delayR.connect(merger, 0, 1);
       merger.connect(delayGain);
       syncDelayTimes();
 
-      // 全局明亮度滤波 + 总线压缩 + 音量
+      // 模拟过载饱和 + 主滤波 + 母带压限
+      driveNode = audioCtx.createWaveShaper();
+      driveNode.curve = makeDriveCurve(state.drive);
+      driveNode.oversample = '2x';
+
       masterFilter = audioCtx.createBiquadFilter();
       masterFilter.type = 'lowpass';
       masterFilter.frequency.value = state.cutoff;
-      masterFilter.Q.value = 0.6;
+      masterFilter.Q.value = 0.7 + state.reso * 3.5;
 
       masterComp = audioCtx.createDynamicsCompressor();
-      masterComp.threshold.value = -12;
-      masterComp.knee.value = 16;
-      masterComp.ratio.value = 5;
-      masterComp.attack.value = 0.005;
-      masterComp.release.value = 0.2;
+      masterComp.threshold.value = -10;
+      masterComp.knee.value = 12;
+      masterComp.ratio.value = 6;
+      masterComp.attack.value = 0.003;
+      masterComp.release.value = 0.14;
 
       masterGain = audioCtx.createGain();
-      masterGain.gain.value = state.masterGain * 0.9;
+      masterGain.gain.value = state.masterGain * 0.92;
 
-      dryBus.connect(masterFilter);
+      dryBus.connect(driveNode);
       reverbGain.connect(masterFilter);
       delayGain.connect(masterFilter);
 
+      driveNode.connect(masterFilter);
       masterFilter.connect(masterComp);
       masterComp.connect(masterGain);
       masterGain.connect(audioCtx.destination);
 
-      // 双耳实时电平分析器
+      // 双耳实时电平分析
       const splitter = audioCtx.createChannelSplitter(2);
       analyserL = audioCtx.createAnalyser();
       analyserR = audioCtx.createAnalyser();
@@ -1221,8 +1575,8 @@
       splitter.connect(analyserL, 0);
       splitter.connect(analyserR, 1);
 
-      // 噪声 Buffer（鼓组与星尘用）
-      const nLen = audioCtx.sampleRate * 0.4;
+      // 白噪 Buffer
+      const nLen = audioCtx.sampleRate * 0.5;
       noiseBuf = audioCtx.createBuffer(1, nLen, audioCtx.sampleRate);
       const nd = noiseBuf.getChannelData(0);
       for (let i = 0; i < nLen; i++) nd[i] = Math.random() * 2 - 1;
@@ -1234,8 +1588,20 @@
     function syncDelayTimes() {
       if (!audioCtx || !delayL) return;
       const beatSec = 60 / state.bpm;
-      delayL.delayTime.setTargetAtTime(beatSec * 0.75, audioCtx.currentTime, 0.05); // 附点八分
-      delayR.delayTime.setTargetAtTime(beatSec * 0.5, audioCtx.currentTime, 0.05);  // 八分
+      delayL.delayTime.setTargetAtTime(beatSec * 0.75, audioCtx.currentTime, 0.04);
+      delayR.delayTime.setTargetAtTime(beatSec * 0.5, audioCtx.currentTime, 0.04);
+    }
+
+    function routeNodeBus(node) {
+      if (!node.panner || !drumBus || !sidechainBus) return;
+      try { node.panner.disconnect(); } catch (e) {}
+      const isDrum = node.role === 'drums';
+      node.panner.connect(isDrum ? drumBus : sidechainBus);
+
+      node.revSend.gain.value = isDrum ? 0.12 : (node.role === 'bass' ? 0.10 : 0.65);
+      node.delSend.gain.value = (node.role === 'arp' || node.role === 'lead' || node.role === 'fx') ? 0.52 : 0.04;
+      node.panner.connect(node.revSend);
+      node.panner.connect(node.delSend);
     }
 
     function setupNodeAudio(node) {
@@ -1244,31 +1610,36 @@
       panner.panningModel = state.useHRTF ? 'HRTF' : 'equalpower';
       panner.distanceModel = 'inverse';
       panner.refDistance = 1.0;
-      panner.maxDistance = 24;
+      panner.maxDistance = 26;
       panner.rolloffFactor = state.rolloff;
 
       const gain = audioCtx.createGain();
       gain.gain.value = node.volume;
-
       gain.connect(panner);
-      panner.connect(dryBus);
 
-      // 根据乐器声部决定混响/延迟发送比例（鼓组低频少混响保持干净，Pad/Lead/Arp 多混响营造空间包裹）
       const revSend = audioCtx.createGain();
-      revSend.gain.value = (node.role === 'bass' || node.role === 'drums') ? 0.14 : 0.72;
-      panner.connect(revSend);
       revSend.connect(reverbNode);
 
       const delSend = audioCtx.createGain();
-      delSend.gain.value = (node.role === 'arp' || node.role === 'lead' || node.role === 'fx') ? 0.55 : 0.05;
-      panner.connect(delSend);
       delSend.connect(delayL);
 
       node.panner = panner;
       node.gainNode = gain;
       node.revSend = revSend;
       node.delSend = delSend;
+      routeNodeBus(node);
       syncNodePosition(node);
+    }
+
+    function triggerSidechainDuck(time) {
+      if (!sidechainBus || state.pump < 0.02) return;
+      const beatSec = 60 / state.bpm;
+      const minGain = Math.max(0.08, 1 - state.pump * 0.88);
+      const release = Math.min(0.42, beatSec * 0.68);
+      sidechainBus.gain.cancelScheduledValues(time);
+      sidechainBus.gain.setValueAtTime(1.0, time);
+      sidechainBus.gain.linearRampToValueAtTime(minGain, time + 0.012);
+      sidechainBus.gain.exponentialRampToValueAtTime(1.0, time + release);
     }
 
     function updateAudioListener() {
@@ -1276,14 +1647,12 @@
       const l = audioCtx.listener;
       const now = audioCtx.currentTime;
       let fx = 0, fy = 0, fz = -1, ux = 0, uy = 1, uz = 0;
-
       if (state.followCamera) {
         const dir = new THREE.Vector3();
         camera.getWorldDirection(dir);
         fx = dir.x; fy = dir.y; fz = dir.z;
         ux = camera.up.x; uy = camera.up.y; uz = camera.up.z;
       }
-
       if (l.forwardX) {
         l.forwardX.setTargetAtTime(fx, now, 0.03);
         l.forwardY.setTargetAtTime(fy, now, 0.03);
@@ -1296,10 +1665,427 @@
       }
     }
 
-    // =========================================================
-    // 4. 高质感乐器合成器（6 种声部，随当前和声实时演奏）
-    // =========================================================
-    function triggerNodeSound(node, force = false) {
+    // =========================================================================
+    // 4. 22 种高级电子合成器引擎（Sample-Accurate 高能发声）
+    // =========================================================================
+    function playTimbreVoice(timbre, dest, time, midiNote, vol, chordInfo) {
+      const freq = midiToFreq(midiNote);
+      const resoQ = 1.2 + state.reso * 11.5;
+
+      switch (timbre) {
+        case 'kick909': {
+          const osc = audioCtx.createOscillator();
+          const click = audioCtx.createOscillator();
+          const env = audioCtx.createGain();
+          const cEnv = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(165, time);
+          osc.frequency.exponentialRampToValueAtTime(46, time + 0.085);
+          osc.frequency.exponentialRampToValueAtTime(34, time + 0.28);
+
+          env.gain.setValueAtTime(vol * 1.45, time);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 0.30);
+
+          click.type = 'triangle';
+          click.frequency.setValueAtTime(1200, time);
+          click.frequency.exponentialRampToValueAtTime(180, time + 0.015);
+          cEnv.gain.setValueAtTime(vol * 0.75, time);
+          cEnv.gain.exponentialRampToValueAtTime(0.0001, time + 0.018);
+
+          osc.connect(env); click.connect(cEnv);
+          env.connect(dest); cEnv.connect(dest);
+          osc.start(time); click.start(time);
+          osc.stop(time + 0.32); click.stop(time + 0.025);
+          triggerSidechainDuck(time);
+          return true;
+        }
+        case 'kick808': {
+          const osc = audioCtx.createOscillator();
+          const env = audioCtx.createGain();
+          osc.type = 'sine';
+          const targetF = Math.max(36, midiToFreq(chordInfo.bass));
+          osc.frequency.setValueAtTime(135, time);
+          osc.frequency.exponentialRampToValueAtTime(targetF, time + 0.06);
+          env.gain.setValueAtTime(vol * 1.35, time);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 0.58);
+          osc.connect(env); env.connect(dest);
+          osc.start(time); osc.stop(time + 0.6);
+          triggerSidechainDuck(time);
+          return true;
+        }
+        case 'clap909': {
+          [0, 0.011, 0.022].forEach((offset, idx) => {
+            const src = audioCtx.createBufferSource();
+            src.buffer = noiseBuf;
+            const bp = audioCtx.createBiquadFilter();
+            bp.type = 'bandpass'; bp.frequency.value = 1450; bp.Q.value = 1.6;
+            const env = audioCtx.createGain();
+            const dur = idx === 2 ? 0.19 : 0.025;
+            env.gain.setValueAtTime(vol * (idx === 2 ? 0.68 : 0.45), time + offset);
+            env.gain.exponentialRampToValueAtTime(0.0001, time + offset + dur);
+            src.connect(bp); bp.connect(env); env.connect(dest);
+            src.start(time + offset); src.stop(time + offset + dur + 0.01);
+          });
+          return false;
+        }
+        case 'snareNeuro': {
+          const body = audioCtx.createOscillator();
+          const bEnv = audioCtx.createGain();
+          body.type = 'triangle';
+          body.frequency.setValueAtTime(240, time);
+          body.frequency.exponentialRampToValueAtTime(125, time + 0.09);
+          bEnv.gain.setValueAtTime(vol * 0.78, time);
+          bEnv.gain.exponentialRampToValueAtTime(0.0001, time + 0.13);
+          body.connect(bEnv); bEnv.connect(dest);
+          body.start(time); body.stop(time + 0.14);
+
+          const src = audioCtx.createBufferSource();
+          src.buffer = noiseBuf;
+          const hp = audioCtx.createBiquadFilter();
+          hp.type = 'highpass'; hp.frequency.value = 1700;
+          const nEnv = audioCtx.createGain();
+          nEnv.gain.setValueAtTime(vol * 0.72, time);
+          nEnv.gain.exponentialRampToValueAtTime(0.0001, time + 0.17);
+          src.connect(hp); hp.connect(nEnv); nEnv.connect(dest);
+          src.start(time); src.stop(time + 0.18);
+          return false;
+        }
+        case 'hatCrisp': {
+          const src = audioCtx.createBufferSource();
+          src.buffer = noiseBuf;
+          const hp = audioCtx.createBiquadFilter();
+          hp.type = 'highpass'; hp.frequency.value = 7800;
+          const env = audioCtx.createGain();
+          env.gain.setValueAtTime(vol * 0.36, time);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 0.055);
+          src.connect(hp); hp.connect(env); env.connect(dest);
+          src.start(time); src.stop(time + 0.065);
+          return false;
+        }
+        case 'percFM': {
+          const car = audioCtx.createOscillator();
+          const mod = audioCtx.createOscillator();
+          const mg = audioCtx.createGain();
+          const env = audioCtx.createGain();
+          car.frequency.setValueAtTime(420 + (midiNote % 12) * 35, time);
+          mod.frequency.setValueAtTime(car.frequency.value * 2.71, time);
+          mg.gain.setValueAtTime(900, time);
+          mg.gain.exponentialRampToValueAtTime(10, time + 0.07);
+          env.gain.setValueAtTime(vol * 0.45, time);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 0.11);
+          mod.connect(mg); mg.connect(car.frequency);
+          car.connect(env); env.connect(dest);
+          car.start(time); mod.start(time);
+          car.stop(time + 0.12); mod.stop(time + 0.12);
+          return false;
+        }
+        case 'acid303': {
+          const osc = audioCtx.createOscillator();
+          const flt = audioCtx.createBiquadFilter();
+          const env = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq * 0.5, time);
+          flt.type = 'lowpass';
+          flt.Q.value = Math.min(18, resoQ * 1.45);
+          flt.frequency.setValueAtTime(freq * 9.5, time);
+          flt.frequency.exponentialRampToValueAtTime(Math.max(120, freq * 1.1), time + 0.22);
+          env.gain.setValueAtTime(0.0001, time);
+          env.gain.linearRampToValueAtTime(vol * 0.52, time + 0.008);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 0.28);
+          osc.connect(flt); flt.connect(env); env.connect(dest);
+          osc.start(time); osc.stop(time + 0.30);
+          return false;
+        }
+        case 'reeseBass': {
+          const f = freq * 0.5;
+          const o1 = audioCtx.createOscillator();
+          const o2 = audioCtx.createOscillator();
+          const flt = audioCtx.createBiquadFilter();
+          const env = audioCtx.createGain();
+          o1.type = 'sawtooth'; o2.type = 'sawtooth';
+          o1.frequency.setValueAtTime(f * 0.991, time);
+          o2.frequency.setValueAtTime(f * 1.009, time);
+          flt.type = 'lowpass';
+          flt.Q.value = 2.8 + state.reso * 4;
+          flt.frequency.setValueAtTime(f * 6.5, time);
+          flt.frequency.exponentialRampToValueAtTime(Math.max(140, f * 2.0), time + 0.52);
+          env.gain.setValueAtTime(0.0001, time);
+          env.gain.linearRampToValueAtTime(vol * 0.44, time + 0.02);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 0.62);
+          o1.connect(flt); o2.connect(flt); flt.connect(env); env.connect(dest);
+          o1.start(time); o2.start(time); o1.stop(time + 0.65); o2.stop(time + 0.65);
+          return false;
+        }
+        case 'wobbleBass': {
+          const f = freq * 0.5;
+          const osc = audioCtx.createOscillator();
+          const lfo = audioCtx.createOscillator();
+          const lfoGain = audioCtx.createGain();
+          const flt = audioCtx.createBiquadFilter();
+          const env = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(f, time);
+          flt.type = 'lowpass';
+          flt.Q.value = 5 + state.reso * 8;
+          flt.frequency.setValueAtTime(520, time);
+          lfo.frequency.setValueAtTime((state.bpm / 60) * 2, time);
+          lfoGain.gain.value = 420;
+          lfo.connect(lfoGain); lfoGain.connect(flt.frequency);
+          env.gain.setValueAtTime(0.0001, time);
+          env.gain.linearRampToValueAtTime(vol * 0.56, time + 0.025);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 0.72);
+          osc.connect(flt); flt.connect(env); env.connect(dest);
+          osc.start(time); lfo.start(time); osc.stop(time + 0.75); lfo.stop(time + 0.75);
+          return false;
+        }
+        case 'fmDonk': {
+          const f = freq * 0.5;
+          const car = audioCtx.createOscillator();
+          const mod = audioCtx.createOscillator();
+          const mg = audioCtx.createGain();
+          const env = audioCtx.createGain();
+          car.type = 'sine'; mod.type = 'sine';
+          car.frequency.setValueAtTime(f, time);
+          mod.frequency.setValueAtTime(f * 3, time);
+          mg.gain.setValueAtTime(f * 6.5, time);
+          mg.gain.exponentialRampToValueAtTime(1, time + 0.16);
+          env.gain.setValueAtTime(0.0001, time);
+          env.gain.linearRampToValueAtTime(vol * 0.58, time + 0.006);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 0.30);
+          mod.connect(mg); mg.connect(car.frequency);
+          car.connect(env); env.connect(dest);
+          car.start(time); mod.start(time); car.stop(time + 0.32); mod.stop(time + 0.32);
+          return false;
+        }
+        case 'neuroBass': {
+          const f = freq * 0.5;
+          const car = audioCtx.createOscillator();
+          const mod = audioCtx.createOscillator();
+          const mg = audioCtx.createGain();
+          const bp = audioCtx.createBiquadFilter();
+          const env = audioCtx.createGain();
+          car.type = 'sawtooth'; mod.type = 'square';
+          car.frequency.setValueAtTime(f, time);
+          mod.frequency.setValueAtTime(f * 1.5, time);
+          mg.gain.setValueAtTime(f * 4.0, time);
+          bp.type = 'bandpass';
+          bp.Q.value = 3.2 + state.reso * 5;
+          bp.frequency.setValueAtTime(280, time);
+          bp.frequency.exponentialRampToValueAtTime(1850, time + 0.18);
+          bp.frequency.exponentialRampToValueAtTime(340, time + 0.45);
+          env.gain.setValueAtTime(0.0001, time);
+          env.gain.linearRampToValueAtTime(vol * 0.55, time + 0.015);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 0.52);
+          mod.connect(mg); mg.connect(car.frequency);
+          car.connect(bp); bp.connect(env); env.connect(dest);
+          car.start(time); mod.start(time); car.stop(time + 0.55); mod.stop(time + 0.55);
+          return false;
+        }
+        case 'subBoom': {
+          const osc = audioCtx.createOscillator();
+          const env = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(Math.max(38, freq * 0.5), time);
+          env.gain.setValueAtTime(0.0001, time);
+          env.gain.linearRampToValueAtTime(vol * 0.72, time + 0.02);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 0.75);
+          osc.connect(env); env.connect(dest);
+          osc.start(time); osc.stop(time + 0.78);
+          return false;
+        }
+        case 'supersaw': {
+          const detunes = [-18, -9, 0, 9, 18];
+          const flt = audioCtx.createBiquadFilter();
+          const env = audioCtx.createGain();
+          flt.type = 'lowpass';
+          flt.Q.value = 1.5 + state.reso * 3;
+          flt.frequency.setValueAtTime(4800, time);
+          flt.frequency.exponentialRampToValueAtTime(1400, time + 0.9);
+          env.gain.setValueAtTime(0.0001, time);
+          env.gain.linearRampToValueAtTime(vol * 0.15, time + 0.04);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 1.05);
+          flt.connect(env); env.connect(dest);
+          detunes.forEach(d => {
+            const o = audioCtx.createOscillator();
+            o.type = 'sawtooth';
+            o.frequency.setValueAtTime(freq, time);
+            o.detune.value = d;
+            o.connect(flt);
+            o.start(time); o.stop(time + 1.1);
+          });
+          return false;
+        }
+        case 'futureChord': {
+          const flt = audioCtx.createBiquadFilter();
+          const env = audioCtx.createGain();
+          flt.type = 'lowpass';
+          flt.frequency.setValueAtTime(320, time);
+          flt.frequency.exponentialRampToValueAtTime(6200, time + 0.24);
+          flt.frequency.exponentialRampToValueAtTime(900, time + 0.78);
+          env.gain.setValueAtTime(0.0001, time);
+          env.gain.linearRampToValueAtTime(vol * 0.20, time + 0.14);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 0.85);
+          flt.connect(env); env.connect(dest);
+          [-14, 0, 14].forEach(d => {
+            const o = audioCtx.createOscillator();
+            o.type = 'sawtooth';
+            o.frequency.setValueAtTime(freq, time);
+            o.detune.value = d;
+            o.connect(flt);
+            o.start(time); o.stop(time + 0.88);
+          });
+          return false;
+        }
+        case 'cyberPad': {
+          const flt = audioCtx.createBiquadFilter();
+          const env = audioCtx.createGain();
+          flt.type = 'lowpass';
+          flt.frequency.setValueAtTime(600, time);
+          flt.frequency.linearRampToValueAtTime(2400, time + 0.85);
+          flt.frequency.linearRampToValueAtTime(750, time + 2.0);
+          env.gain.setValueAtTime(0.0001, time);
+          env.gain.linearRampToValueAtTime(vol * 0.22, time + 0.42);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 2.2);
+          flt.connect(env); env.connect(dest);
+          [-10, 10].forEach(d => {
+            const o = audioCtx.createOscillator();
+            o.type = 'sawtooth';
+            o.frequency.setValueAtTime(freq, time);
+            o.detune.value = d;
+            o.connect(flt);
+            o.start(time); o.stop(time + 2.25);
+          });
+          return false;
+        }
+        case 'choirSynth': {
+          const o = audioCtx.createOscillator();
+          const f1 = audioCtx.createBiquadFilter();
+          const f2 = audioCtx.createBiquadFilter();
+          const env = audioCtx.createGain();
+          o.type = 'sawtooth';
+          o.frequency.setValueAtTime(freq, time);
+          f1.type = 'bandpass'; f1.frequency.value = 720; f1.Q.value = 4.5;
+          f2.type = 'bandpass'; f2.frequency.value = 1280; f2.Q.value = 4.5;
+          env.gain.setValueAtTime(0.0001, time);
+          env.gain.linearRampToValueAtTime(vol * 0.34, time + 0.5);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 2.1);
+          o.connect(f1); o.connect(f2);
+          f1.connect(env); f2.connect(env); env.connect(dest);
+          o.start(time); o.stop(time + 2.15);
+          return false;
+        }
+        case 'trancePluck': {
+          const o1 = audioCtx.createOscillator();
+          const o2 = audioCtx.createOscillator();
+          const flt = audioCtx.createBiquadFilter();
+          const env = audioCtx.createGain();
+          o1.type = 'sawtooth'; o2.type = 'sawtooth';
+          o1.frequency.setValueAtTime(freq, time);
+          o2.frequency.setValueAtTime(freq, time);
+          o1.detune.value = -8; o2.detune.value = 8;
+          flt.type = 'lowpass';
+          flt.Q.value = 2.2 + state.reso * 4;
+          flt.frequency.setValueAtTime(freq * 11, time);
+          flt.frequency.exponentialRampToValueAtTime(Math.max(220, freq * 1.15), time + 0.24);
+          env.gain.setValueAtTime(0.0001, time);
+          env.gain.linearRampToValueAtTime(vol * 0.34, time + 0.005);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 0.42);
+          o1.connect(flt); o2.connect(flt); flt.connect(env); env.connect(dest);
+          o1.start(time); o2.start(time); o1.stop(time + 0.45); o2.stop(time + 0.45);
+          return false;
+        }
+        case 'cyberArp': {
+          const o = audioCtx.createOscillator();
+          const flt = audioCtx.createBiquadFilter();
+          const env = audioCtx.createGain();
+          o.type = 'square';
+          o.frequency.setValueAtTime(freq, time);
+          flt.type = 'bandpass';
+          flt.Q.value = 2.5 + state.reso * 5;
+          flt.frequency.setValueAtTime(freq * 4, time);
+          flt.frequency.exponentialRampToValueAtTime(freq * 1.4, time + 0.16);
+          env.gain.setValueAtTime(0.0001, time);
+          env.gain.linearRampToValueAtTime(vol * 0.38, time + 0.004);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 0.20);
+          o.connect(flt); flt.connect(env); env.connect(dest);
+          o.start(time); o.stop(time + 0.22);
+          return false;
+        }
+        case 'laserLead': {
+          const o = audioCtx.createOscillator();
+          const mod = audioCtx.createOscillator();
+          const mg = audioCtx.createGain();
+          const env = audioCtx.createGain();
+          o.type = 'sawtooth'; mod.type = 'sine';
+          o.frequency.setValueAtTime(freq * 1.5, time);
+          o.frequency.exponentialRampToValueAtTime(freq, time + 0.04);
+          mod.frequency.setValueAtTime(freq * 2, time);
+          mg.gain.setValueAtTime(freq * 1.8, time);
+          mg.gain.exponentialRampToValueAtTime(10, time + 0.28);
+          env.gain.setValueAtTime(0.0001, time);
+          env.gain.linearRampToValueAtTime(vol * 0.36, time + 0.008);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 0.48);
+          mod.connect(mg); mg.connect(o.frequency);
+          o.connect(env); env.connect(dest);
+          o.start(time); mod.start(time); o.stop(time + 0.5); mod.stop(time + 0.5);
+          return false;
+        }
+        case 'hoover': {
+          const flt = audioCtx.createBiquadFilter();
+          const env = audioCtx.createGain();
+          flt.type = 'lowpass';
+          flt.Q.value = 3.5;
+          flt.frequency.setValueAtTime(3400, time);
+          env.gain.setValueAtTime(0.0001, time);
+          env.gain.linearRampToValueAtTime(vol * 0.24, time + 0.03);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 0.65);
+          flt.connect(env); env.connect(dest);
+          [0.985, 1.0, 1.015].forEach(ratio => {
+            const o = audioCtx.createOscillator();
+            o.type = 'sawtooth';
+            o.frequency.setValueAtTime(freq * ratio * 0.85, time);
+            o.frequency.exponentialRampToValueAtTime(freq * ratio, time + 0.14);
+            o.connect(flt);
+            o.start(time); o.stop(time + 0.68);
+          });
+          return false;
+        }
+        case 'bellFM': {
+          const car = audioCtx.createOscillator();
+          const mod = audioCtx.createOscillator();
+          const mg = audioCtx.createGain();
+          const env = audioCtx.createGain();
+          car.frequency.setValueAtTime(freq, time);
+          mod.frequency.setValueAtTime(freq * 3.5, time);
+          mg.gain.setValueAtTime(freq * 2.6, time);
+          mg.gain.exponentialRampToValueAtTime(1, time + 0.4);
+          env.gain.setValueAtTime(0.0001, time);
+          env.gain.linearRampToValueAtTime(vol * 0.32, time + 0.006);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 0.95);
+          mod.connect(mg); mg.connect(car.frequency);
+          car.connect(env); env.connect(dest);
+          car.start(time); mod.start(time); car.stop(time + 1.0); mod.stop(time + 1.0);
+          return false;
+        }
+        case 'glitchFx':
+        default: {
+          const o = audioCtx.createOscillator();
+          const env = audioCtx.createGain();
+          o.type = 'square';
+          o.frequency.setValueAtTime(freq * 2.5, time);
+          o.frequency.exponentialRampToValueAtTime(freq * 0.5, time + 0.12);
+          o.frequency.exponentialRampToValueAtTime(freq * 4.0, time + 0.24);
+          env.gain.setValueAtTime(0.0001, time);
+          env.gain.linearRampToValueAtTime(vol * 0.24, time + 0.01);
+          env.gain.exponentialRampToValueAtTime(0.0001, time + 0.28);
+          o.connect(env); env.connect(dest);
+          o.start(time); o.stop(time + 0.30);
+          return false;
+        }
+      }
+    }
+
+    function triggerNodeAtTime(node, time, stepIndex, force = false) {
       if (!audioCtx || audioCtx.state !== 'running') return;
       if (!force) {
         if (!node.enabled || node.muted) return;
@@ -1307,193 +2093,53 @@
         if (state.soloIndex !== -1 && state.soloIndex !== node.index) return;
       }
 
-      const now = audioCtx.currentTime;
-      const dest = node.gainNode;
-      const styleData = STYLES[state.style];
-      const chord = styleData.chords[state.chordIdx % styleData.chords.length];
+      const chordInfo = getCurrentChordInfo();
       const octShift = node.octave * 12;
-      const vol = Math.max(0.08, node.volume) * (1 / Math.sqrt(Math.max(6, state.activeCount) * 0.25));
+      let midi = chordInfo.arp[0];
 
-      if (node.role === 'drums') {
-        const drumType = node.subIndex % 3; // 0: Kick, 1: Snare/Rim, 2: Crisp Hat
-        if (drumType === 0) {
-          const osc = audioCtx.createOscillator();
-          const env = audioCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(145, now);
-          osc.frequency.exponentialRampToValueAtTime(42, now + 0.11);
-          env.gain.setValueAtTime(vol * 1.15, now);
-          env.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
-          osc.connect(env); env.connect(dest);
-          osc.start(now); osc.stop(now + 0.34);
-        } else if (drumType === 1) {
-          // 立体声军鼓/边击
-          const src = audioCtx.createBufferSource();
-          src.buffer = noiseBuf;
-          const bp = audioCtx.createBiquadFilter();
-          bp.type = 'bandpass'; bp.frequency.value = 1800; bp.Q.value = 1.4;
-          const env = audioCtx.createGain();
-          env.gain.setValueAtTime(vol * 0.58, now);
-          env.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
-          src.connect(bp); bp.connect(env); env.connect(dest);
-          src.start(now); src.stop(now + 0.16);
-        } else {
-          // 细腻高频 Hi-Hat（极佳的左右耳空间瞬态感）
-          const src = audioCtx.createBufferSource();
-          src.buffer = noiseBuf;
-          const hp = audioCtx.createBiquadFilter();
-          hp.type = 'highpass'; hp.frequency.value = 7200;
-          const env = audioCtx.createGain();
-          env.gain.setValueAtTime(vol * 0.32, now);
-          env.gain.exponentialRampToValueAtTime(0.0001, now + 0.055);
-          src.connect(hp); hp.connect(env); env.connect(dest);
-          src.start(now); src.stop(now + 0.065);
-        }
-      } else if (node.role === 'bass') {
-        // 温暖模拟 Sub + 锯齿低通贝斯
-        const freq = midiToFreq(chord.bass + octShift);
-        const osc1 = audioCtx.createOscillator();
-        const osc2 = audioCtx.createOscillator();
-        const flt = audioCtx.createBiquadFilter();
-        const env = audioCtx.createGain();
-
-        osc1.type = 'sawtooth';
-        osc2.type = 'sine';
-        osc1.frequency.setValueAtTime(freq, now);
-        osc2.frequency.setValueAtTime(freq, now);
-
-        flt.type = 'lowpass';
-        flt.frequency.setValueAtTime(freq * 4.5, now);
-        flt.frequency.exponentialRampToValueAtTime(freq * 1.6, now + 0.45);
-
-        env.gain.setValueAtTime(0.0001, now);
-        env.gain.linearRampToValueAtTime(vol * 0.52, now + 0.025);
-        env.gain.exponentialRampToValueAtTime(0.0001, now + 0.85);
-
-        osc1.connect(flt); osc2.connect(flt);
-        flt.connect(env); env.connect(dest);
-        osc1.start(now); osc2.start(now);
-        osc1.stop(now + 0.9); osc2.stop(now + 0.9);
+      if (node.role === 'bass') {
+        midi = chordInfo.bass + 12 + octShift + ((stepIndex % 8 === 6) ? 7 : 0);
       } else if (node.role === 'pad') {
-        // 双失谐温暖弦乐铺底 Pad
-        const note = chord.pad[node.subIndex % chord.pad.length] + octShift;
-        const freq = midiToFreq(note);
-        const o1 = audioCtx.createOscillator();
-        const o2 = audioCtx.createOscillator();
-        const flt = audioCtx.createBiquadFilter();
-        const env = audioCtx.createGain();
-
-        o1.type = 'sawtooth';
-        o2.type = 'triangle';
-        o1.frequency.setValueAtTime(freq * 0.996, now);
-        o2.frequency.setValueAtTime(freq * 1.004, now);
-
-        flt.type = 'lowpass';
-        flt.frequency.setValueAtTime(1100, now);
-        flt.frequency.linearRampToValueAtTime(2200, now + 1.1);
-        flt.frequency.linearRampToValueAtTime(900, now + 2.8);
-
-        env.gain.setValueAtTime(0.0001, now);
-        env.gain.linearRampToValueAtTime(vol * 0.22, now + 0.75);
-        env.gain.exponentialRampToValueAtTime(0.0001, now + 3.0);
-
-        o1.connect(flt); o2.connect(flt);
-        flt.connect(env); env.connect(dest);
-        o1.start(now); o2.start(now);
-        o1.stop(now + 3.1); o2.stop(now + 3.1);
+        midi = chordInfo.chord[node.subIndex % chordInfo.chord.length] + octShift;
       } else if (node.role === 'arp') {
-        // 温暖电钢 / 竖琴拨弦琶音
-        const note = chord.arp[(node.subIndex + currentStep) % chord.arp.length] + octShift;
-        const freq = midiToFreq(note);
-        const osc = audioCtx.createOscillator();
-        const sub = audioCtx.createOscillator();
-        const flt = audioCtx.createBiquadFilter();
-        const env = audioCtx.createGain();
-
-        osc.type = 'triangle';
-        sub.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now);
-        sub.frequency.setValueAtTime(freq * 2, now);
-
-        flt.type = 'lowpass';
-        flt.frequency.setValueAtTime(freq * 5, now);
-        flt.frequency.exponentialRampToValueAtTime(freq * 1.3, now + 0.35);
-
-        env.gain.setValueAtTime(0.0001, now);
-        env.gain.linearRampToValueAtTime(vol * 0.38, now + 0.008);
-        env.gain.exponentialRampToValueAtTime(0.0001, now + 0.65);
-
-        osc.connect(flt); sub.connect(flt);
-        flt.connect(env); env.connect(dest);
-        osc.start(now); sub.start(now);
-        osc.stop(now + 0.7); sub.stop(now + 0.7);
+        const idx = (node.subIndex + stepIndex + (state.seed % 5)) % chordInfo.arp.length;
+        midi = chordInfo.arp[idx] + octShift;
       } else if (node.role === 'lead') {
-        // FM 晶莹电钢/铃音主旋律
-        const note = chord.arp[(node.subIndex * 2 + Math.floor(currentStep / 2)) % chord.arp.length] + octShift;
-        const freq = midiToFreq(note);
-        const carrier = audioCtx.createOscillator();
-        const mod = audioCtx.createOscillator();
-        const modGain = audioCtx.createGain();
-        const env = audioCtx.createGain();
-
-        carrier.type = 'sine';
-        mod.type = 'sine';
-        carrier.frequency.setValueAtTime(freq, now);
-        mod.frequency.setValueAtTime(freq * 2.0, now);
-
-        modGain.gain.setValueAtTime(freq * 0.85, now);
-        modGain.gain.exponentialRampToValueAtTime(1.0, now + 0.45);
-
-        env.gain.setValueAtTime(0.0001, now);
-        env.gain.linearRampToValueAtTime(vol * 0.36, now + 0.015);
-        env.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
-
-        mod.connect(modGain);
-        modGain.connect(carrier.frequency);
-        carrier.connect(env);
-        env.connect(dest);
-
-        carrier.start(now); mod.start(now);
-        carrier.stop(now + 1.55); mod.stop(now + 1.55);
+        const idx = (node.subIndex * 2 + Math.floor(stepIndex / 2) + (state.seed % 3)) % chordInfo.arp.length;
+        midi = chordInfo.arp[idx] + octShift;
       } else if (node.role === 'fx') {
-        // 高空星尘粒子（极高泛音，强化头顶/立体高度感）
-        const note = chord.arp[node.subIndex % chord.arp.length] + 12 + octShift;
-        const freq = midiToFreq(note);
-        const osc = audioCtx.createOscillator();
-        const env = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now);
-        osc.frequency.exponentialRampToValueAtTime(freq * 1.015, now + 1.2);
-
-        env.gain.setValueAtTime(0.0001, now);
-        env.gain.linearRampToValueAtTime(vol * 0.16, now + 0.25);
-        env.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
-
-        osc.connect(env); env.connect(dest);
-        osc.start(now); osc.stop(now + 1.85);
+        midi = chordInfo.arp[node.subIndex % chordInfo.arp.length] + 12 + octShift;
       }
 
-      node.pulse = 1.0;
+      const densityNorm = 1 / Math.sqrt(Math.max(6, state.activeCount) * 0.24);
+      const vol = Math.max(0.08, node.volume) * densityNorm;
+      const isKick = playTimbreVoice(node.timbre, node.gainNode, time, midi, vol, chordInfo);
+
+      // 精确同步 3D 视觉脉冲与双耳射线
+      const delayMs = Math.max(0, (time - audioCtx.currentTime) * 1000);
+      setTimeout(() => {
+        node.pulse = 1.0;
+        if (isKick) kickVisualPulse = 1.0;
+        spawnAcousticBeam(node.mesh.position, ROLE_META[node.role].color);
+      }, delayMs);
     }
 
-    // =========================================================
-    // 5. 创建 36 个空间发声节点
-    // =========================================================
+    // =========================================================================
+    // 5. 创建 36 个 3D 空间声源节点
+    // =========================================================================
     const soundNodes = [];
     const nodeMeshes = [];
     const sphereGeo = new THREE.SphereGeometry(0.115, 22, 22);
-    const haloGeo = new THREE.RingGeometry(0.15, 0.195, 28);
+    const haloGeo = new THREE.RingGeometry(0.15, 0.20, 28);
 
-    // 36 个节点按音乐声部合理分配：6鼓、4贝斯、8铺底、8琶音、6主音、4星尘
     const ROLE_DISTRIBUTION = [
-      ...Array(6).fill('drums'),
-      ...Array(4).fill('bass'),
-      ...Array(8).fill('pad'),
+      ...Array(8).fill('drums'),
+      ...Array(6).fill('bass'),
+      ...Array(6).fill('pad'),
       ...Array(8).fill('arp'),
-      ...Array(6).fill('lead'),
-      ...Array(4).fill('fx')
+      ...Array(5).fill('lead'),
+      ...Array(3).fill('fx')
     ];
-
     const roleCounter = { drums: 0, bass: 0, pad: 0, arp: 0, lead: 0, fx: 0 };
 
     for (let i = 0; i < MAX_NODES; i++) {
@@ -1505,12 +2151,11 @@
         color,
         emissive: color,
         emissiveIntensity: 0.45,
-        roughness: 0.22,
-        metalness: 0.25,
+        roughness: 0.2,
+        metalness: 0.28,
         transparent: true,
         opacity: 0.92
       });
-
       const mesh = new THREE.Mesh(sphereGeo, mat);
       mesh.userData.nodeIndex = i;
 
@@ -1523,18 +2168,22 @@
       scene.add(mesh);
       nodeMeshes.push(mesh);
 
+      const defaultDensity = role === 'arp' ? 5 : role === 'lead' ? 3 : role === 'fx' ? 2 : 4;
       soundNodes.push({
         index: i,
         mesh,
         halo,
         role,
         subIndex,
+        timbre: 'supersaw',
         azimuth: 0,
         elevation: 0,
         baseDist: 2.5,
-        volume: 0.72,
+        volume: 0.78,
         octave: 0,
-        orbitSpeed: (i % 2 === 0 ? 1 : -1) * (5 + (i % 6) * 2.5),
+        density: defaultDensity,
+        mask: buildEuclidMask(defaultDensity, 16, i),
+        orbitSpeed: (i % 2 === 0 ? 1 : -1) * (7 + (i % 6) * 3),
         enabled: i < state.activeCount,
         muted: false,
         pulse: 0,
@@ -1545,9 +2194,8 @@
       });
     }
 
-    // 计算节点受「全局距离缩放」与「垂直高度跨度」影响后的实时坐标
     function getEffectiveCoords(node) {
-      const dist = THREE.MathUtils.clamp(node.baseDist * state.globalScale, 0.55, 11.0);
+      const dist = THREE.MathUtils.clamp(node.baseDist * state.globalScale, 0.55, 11.5);
       const elev = THREE.MathUtils.clamp(node.elevation * state.heightSpread, -82, 82);
       return { dist, elev };
     }
@@ -1556,13 +2204,12 @@
       const { dist, elev } = getEffectiveCoords(node);
       const azRad = THREE.MathUtils.degToRad(node.azimuth);
       const elRad = THREE.MathUtils.degToRad(elev);
-
       const x = dist * Math.cos(elRad) * Math.sin(azRad);
       const y = dist * Math.sin(elRad);
       const z = -dist * Math.cos(elRad) * Math.cos(azRad);
 
       node.mesh.position.set(x, y, z);
-      node.mesh.scale.setScalar(0.65 + node.volume * 0.78);
+      node.mesh.scale.setScalar(0.65 + node.volume * 0.76);
 
       if (node.panner && audioCtx) {
         const now = audioCtx.currentTime;
@@ -1584,17 +2231,115 @@
 
       const dimmed = node.muted || !state.stems[node.role] || (state.soloIndex !== -1 && state.soloIndex !== node.index);
       node.mesh.visible = node.enabled;
-      node.mesh.material.opacity = dimmed ? 0.18 : 0.92;
+      node.mesh.material.opacity = dimmed ? 0.16 : 0.94;
+      routeNodeBus(node);
+    }
 
-      if (node.revSend && node.delSend) {
-        node.revSend.gain.value = (node.role === 'bass' || node.role === 'drums') ? 0.14 : 0.72;
-        node.delSend.gain.value = (node.role === 'arp' || node.role === 'lead' || node.role === 'fx') ? 0.55 : 0.05;
+    // =========================================================================
+    // 6. 风格加载、无限变异引擎 & 8 种空间布阵
+    // =========================================================================
+    function applyStyle(styleKey, keepMix = false) {
+      const s = STYLES[styleKey];
+      state.style = styleKey;
+      state.rhythmStyle = styleKey;
+      state.bpm = s.bpm;
+      state.root = s.root;
+      state.scale = s.scale;
+      state.prog = [...s.prog];
+      state.chordStep = 0;
+
+      if (!keepMix) {
+        state.pump = s.pump;
+        state.drive = s.drive;
+        state.reso = s.reso;
+      }
+
+      // 为 36 个节点分配该风格专属高级音色组合
+      soundNodes.forEach(n => {
+        const list = s.palette[n.role];
+        n.timbre = list[n.subIndex % list.length];
+        n.mask = buildEuclidMask(n.density, 16, (n.index * 3 + state.seed) % 16);
+      });
+
+      syncGlobalControlsToUI();
+      applyMasterAudioParams();
+      refreshInspector();
+      if (state.isPlaying) {
+        document.getElementById('hud-status').textContent = `AETHER 3D 运行中 · ${s.name} (${state.bpm} BPM)`;
       }
     }
 
-    // =========================================================
-    // 6. 8 种空间布阵预设
-    // =========================================================
+    // ⚡ 无限变异基因：打乱节奏分布、音色子集、和声走向与八度跳跃（始终和谐不跑调）
+    function mutateUniverse() {
+      state.seed = Math.floor(Math.random() * 0xFFFF);
+      document.getElementById('seed-display').textContent = `GEN #${state.seed.toString(16).toUpperCase().padStart(4, '0')}`;
+
+      const progs = [
+        [0, 5, 3, 4], [0, 2, 5, 4], [0, 6, 5, 4], [0, 1, 5, 4],
+        [0, 3, 5, 2], [5, 6, 0, 0], [0, 4, 5, 3], [0, 0, 3, 1]
+      ];
+      state.prog = progs[state.seed % progs.length];
+
+      const roleTimbrePools = {
+        drums: ['kick909','kick808','clap909','snareNeuro','hatCrisp','percFM'],
+        bass:  ['acid303','reeseBass','wobbleBass','fmDonk','neuroBass','subBoom'],
+        pad:   ['supersaw','futureChord','cyberPad','choirSynth'],
+        arp:   ['trancePluck','cyberArp','acid303','bellFM'],
+        lead:  ['laserLead','hoover','bellFM','supersaw','trancePluck'],
+        fx:    ['glitchFx','laserLead','percFM','bellFM']
+      };
+
+      soundNodes.forEach((n, i) => {
+        const pool = roleTimbrePools[n.role];
+        // 鼓组前两个保持 Kick，保证电音核心底鼓稳固
+        if (n.role === 'drums' && n.subIndex < 2) {
+          n.timbre = Math.random() < 0.55 ? 'kick909' : 'kick808';
+        } else {
+          n.timbre = pool[Math.floor(Math.random() * pool.length)];
+        }
+        const dens = n.role === 'arp' ? (3 + Math.floor(Math.random() * 6))
+                   : n.role === 'lead' ? (2 + Math.floor(Math.random() * 4))
+                   : n.role === 'fx' ? (1 + Math.floor(Math.random() * 3))
+                   : (2 + Math.floor(Math.random() * 5));
+        n.density = dens;
+        n.mask = buildEuclidMask(dens, 16, Math.floor(Math.random() * 16));
+        n.octave = (n.role === 'arp' || n.role === 'lead') ? (Math.random() < 0.25 ? 1 : 0) : 0;
+      });
+
+      refreshInspector();
+    }
+
+    // 🎲 跨界风格混搭：A 风格鼓点律动 + B 风格和声调性 + C 风格音色库
+    function crossGenreRemix() {
+      const keys = Object.keys(STYLES);
+      const rKey = keys[Math.floor(Math.random() * keys.length)];
+      const hKey = keys[Math.floor(Math.random() * keys.length)];
+      const tKey = keys[Math.floor(Math.random() * keys.length)];
+
+      state.rhythmStyle = rKey;
+      state.root = Math.floor(Math.random() * 12);
+      const scaleKeys = Object.keys(SCALES);
+      state.scale = scaleKeys[Math.floor(Math.random() * scaleKeys.length)];
+      state.prog = [...STYLES[hKey].prog];
+      state.bpm = Math.round((STYLES[rKey].bpm + STYLES[hKey].bpm) / 2);
+
+      const pal = STYLES[tKey].palette;
+      soundNodes.forEach(n => {
+        const list = pal[n.role];
+        n.timbre = list[Math.floor(Math.random() * list.length)];
+        n.mask = buildEuclidMask(n.density, 16, Math.floor(Math.random() * 16));
+      });
+
+      state.seed = Math.floor(Math.random() * 0xFFFF);
+      document.getElementById('seed-display').textContent = `MIX #${state.seed.toString(16).toUpperCase().padStart(4, '0')}`;
+      if (state.isPlaying) {
+        document.getElementById('hud-status').textContent = `跨界混搭 · ${STYLES[rKey].name}鼓 × ${STYLES[tKey].name}音色`;
+      }
+      syncGlobalControlsToUI();
+      applyMasterAudioParams();
+      refreshInspector();
+    }
+
     function applyPreset(name) {
       state.preset = name;
       document.querySelectorAll('#preset-grid .btn-chip').forEach(b => {
@@ -1604,73 +2349,62 @@
       soundNodes.forEach((n, i) => {
         n.muted = false;
         if (name === 'nebula') {
-          // 黄金螺旋球面全景
           const phi = Math.acos(1 - 2 * (i + 0.5) / MAX_NODES);
           const theta = Math.PI * (1 + Math.sqrt(5)) * i;
           n.azimuth = THREE.MathUtils.radToDeg(theta % (Math.PI * 2)) - 180;
           n.elevation = THREE.MathUtils.clamp(90 - THREE.MathUtils.radToDeg(phi), -65, 65);
-          n.baseDist = [1.5, 2.7, 4.2][i % 3] + (i % 4) * 0.2;
-          n.orbitSpeed = (i % 2 === 0 ? 1 : -1) * (6 + (i % 5) * 3);
+          n.baseDist = [1.45, 2.7, 4.2][i % 3] + (i % 4) * 0.2;
+          n.orbitSpeed = (i % 2 === 0 ? 1 : -1) * (8 + (i % 5) * 4);
         } else if (name === 'ears') {
-          // 双耳近场贴耳（左右耳簇拥，极强耳边微风感）
           const left = i % 2 === 0;
           n.azimuth = (left ? -90 : 90) + ((i % 9) - 4) * 12;
-          n.elevation = ((i % 5) - 2) * 14;
-          n.baseDist = 0.85 + (i % 4) * 0.28;
-          n.orbitSpeed = (left ? 4 : -4);
+          n.elevation = ((i % 5) - 2) * 15;
+          n.baseDist = 0.8 + (i % 4) * 0.26;
+          n.orbitSpeed = left ? 5 : -5;
         } else if (name === 'rings') {
-          // 远近三层纵深梯队
           const ring = Math.floor(i / 12);
           n.azimuth = ((i % 12) / 12) * 360 - 180;
           n.elevation = (ring - 1) * 18;
-          n.baseDist = [1.35, 2.9, 5.0][ring];
-          n.orbitSpeed = [14, -9, 5][ring];
+          n.baseDist = [1.3, 2.85, 5.0][ring];
+          n.orbitSpeed = [18, -11, 6][ring];
         } else if (name === 'helix') {
-          // DNA 双螺旋上升
-          const strand = i % 2;
           const t = i / MAX_NODES;
-          n.azimuth = (t * 720 + strand * 180) % 360 - 180;
+          n.azimuth = (t * 720 + (i % 2) * 180) % 360 - 180;
           n.elevation = -62 + t * 124;
-          n.baseDist = 1.6 + Math.sin(t * Math.PI) * 1.8;
-          n.orbitSpeed = 16;
+          n.baseDist = 1.55 + Math.sin(t * Math.PI) * 1.9;
+          n.orbitSpeed = 20;
         } else if (name === 'hall') {
-          // 交响音乐厅（主舞台在前方扇形，混响氛围在后方）
           if (n.role === 'pad' || n.role === 'fx') {
             n.azimuth = ((i % 12) / 12) * 200 + 80;
             if (n.azimuth > 180) n.azimuth -= 360;
-            n.baseDist = 4.2 + (i % 3) * 0.6;
-            n.elevation = 15 + (i % 3) * 14;
+            n.baseDist = 4.0 + (i % 3) * 0.6;
+            n.elevation = 16 + (i % 3) * 14;
           } else {
             n.azimuth = -72 + (i % 12) * 13;
-            n.baseDist = 1.8 + (i % 4) * 0.7;
-            n.elevation = -10 + (i % 3) * 12;
+            n.baseDist = 1.7 + (i % 4) * 0.65;
+            n.elevation = -8 + (i % 3) * 11;
           }
           n.orbitSpeed = 0;
         } else if (name === 'dome') {
-          // 头顶苍穹穹顶（全部在水平面以上覆盖头顶）
           const ring = Math.floor(i / 9);
           n.azimuth = ((i % 9) / 9) * 360 - 180;
           n.elevation = 12 + ring * 20;
           n.baseDist = 3.2 - ring * 0.45;
-          n.orbitSpeed = (ring % 2 === 0 ? 10 : -12);
+          n.orbitSpeed = ring % 2 === 0 ? 12 : -14;
         } else if (name === 'cross') {
-          // 双环倾斜交叉对冲
-          const isRingA = i < 18;
-          const idx = i % 18;
-          const ang = (idx / 18) * 360 - 180;
+          const isA = i < 18;
+          const ang = ((i % 18) / 18) * 360 - 180;
           n.azimuth = ang;
-          n.elevation = Math.sin(THREE.MathUtils.degToRad(ang)) * (isRingA ? 48 : -48);
-          n.baseDist = isRingA ? 2.2 : 3.4;
-          n.orbitSpeed = isRingA ? 18 : -18;
+          n.elevation = Math.sin(THREE.MathUtils.degToRad(ang)) * (isA ? 50 : -50);
+          n.baseDist = isA ? 2.1 : 3.4;
+          n.orbitSpeed = isA ? 22 : -22;
         } else if (name === 'matrix') {
-          // 8 方位 × 3 高度精准 HRTF 校准阵
           const azList = [-180, -135, -90, -45, 0, 45, 90, 135];
           n.azimuth = azList[i % 8];
           n.elevation = [-35, 0, 35][Math.floor(i / 8) % 3];
-          n.baseDist = 1.6 + Math.floor(i / 24) * 2.0;
+          n.baseDist = 1.55 + Math.floor(i / 24) * 2.1;
           n.orbitSpeed = 0;
         }
-
         syncNodePosition(n);
         updateNodeVisual(n);
       });
@@ -1679,94 +2413,162 @@
       refreshInspector();
     }
 
-    // =========================================================
-    // 7. 乐理律动步进音序器（16 步 = 1 小节，每 2 小节自动转调）
-    // =========================================================
-    let stepTimer = null;
+    // =========================================================================
+    // 7. 毫秒级高精度 Lookahead 电子音序引擎 + Auto-DJ 能量演进
+    // =========================================================================
+    let schedulerTimer = null;
+    let nextNoteTime = 0;
     let currentStep = 0;
     let barCount = 0;
 
-    function startSequencer() {
-      stopSequencer();
-      const getStepMs = () => (60 / state.bpm / 4) * 1000;
+    function setEnergyMode(mode) {
+      state.energy = mode;
+      document.querySelectorAll('#energy-bar .energy-btn[data-energy]').forEach(b => {
+        b.classList.toggle('active', b.dataset.energy === mode);
+      });
+    }
 
-      function tick() {
-        if (!state.isPlaying) return;
+    function scheduleStep(step, time) {
+      const stepInBar = step % 16;
+      const rStyle = STYLES[state.rhythmStyle];
 
-        const styleData = STYLES[state.style];
-        const stepInBar = currentStep % 16;
+      // 每小节更新和弦与 Auto-DJ 段落
+      if (stepInBar === 0 && step > 0) {
+        barCount++;
+        if (barCount % 2 === 0) {
+          state.chordStep = (state.chordStep + 1) % state.prog.length;
+        }
+        if (state.autoDJ) {
+          const phase = barCount % 16;
+          if (phase < 4) setEnergyMode('groove');
+          else if (phase < 8) setEnergyMode('build');
+          else if (phase < 14) setEnergyMode('drop');
+          else setEnergyMode('break');
+        }
+      }
 
-        // 更新底部步进指示灯
+      const chordInfo = getCurrentChordInfo();
+      const delayMs = Math.max(0, (time - audioCtx.currentTime) * 1000);
+      setTimeout(() => {
         stepCells.forEach((c, idx) => c.classList.toggle('now', idx === stepInBar));
+        document.getElementById('chord-display').textContent = `${chordInfo.label} · ${state.energy.toUpperCase()}`;
+      }, delayMs);
 
-        // 每 2 小节切一次和弦（如果开启自动和声演进）
-        if (stepInBar === 0 && currentStep > 0) {
-          barCount++;
-          if (state.autoProgression && barCount % 2 === 0) {
-            state.chordIdx = (state.chordIdx + 1) % styleData.chords.length;
+      const en = state.energy;
+
+      soundNodes.forEach(node => {
+        if (!node.enabled) return;
+
+        if (node.role === 'drums') {
+          if (en === 'break') return; // Break 段落抽离鼓组，营造悬空感
+          if (en === 'build') {
+            // Build 爬升段落：后半小节高频军鼓/拍手滚奏！
+            if ((node.timbre === 'snareNeuro' || node.timbre === 'clap909') &&
+                (stepInBar % (barCount % 2 === 1 ? 1 : 2) === 0)) {
+              triggerNodeAtTime(node, time, step);
+            }
+            return;
+          }
+          // Groove / Drop 鼓组触发
+          const t = node.timbre;
+          if ((t === 'kick909' || t === 'kick808') && rStyle.kick.includes(stepInBar)) {
+            if (node.subIndex === 0 || en === 'drop') triggerNodeAtTime(node, time, step);
+          } else if ((t === 'clap909' || t === 'snareNeuro') && rStyle.snare.includes(stepInBar)) {
+            triggerNodeAtTime(node, time, step);
+          } else if (t === 'hatCrisp' && rStyle.hat.includes(stepInBar)) {
+            if (Math.random() <= state.grooveDensity + 0.25) triggerNodeAtTime(node, time, step);
+          } else if (t === 'percFM' && node.mask[stepInBar] && en === 'drop') {
+            if (Math.random() <= state.grooveDensity) triggerNodeAtTime(node, time, step);
+          }
+        } else if (node.role === 'bass') {
+          if (en === 'break' && node.subIndex > 0) return;
+          const isBassHit = rStyle.bassSteps.includes(stepInBar) || (en === 'drop' && node.mask[stepInBar]);
+          if (isBassHit && (node.subIndex % 3 === stepInBar % 3 || node.subIndex === 0)) {
+            triggerNodeAtTime(node, time, step);
+          }
+        } else if (node.role === 'pad') {
+          if (stepInBar === (node.subIndex * 4) % 16) {
+            triggerNodeAtTime(node, time, step);
+          }
+        } else if (node.role === 'arp') {
+          if (en === 'break' && stepInBar % 4 !== 0) return;
+          if (node.mask[stepInBar] && (Math.random() <= state.grooveDensity + 0.15)) {
+            triggerNodeAtTime(node, time, step);
+          }
+        } else if (node.role === 'lead') {
+          if (en === 'groove' && node.subIndex > 1) return;
+          if (node.mask[stepInBar] && ((step + node.subIndex) % 3 === 0)) {
+            triggerNodeAtTime(node, time, step);
+          }
+        } else if (node.role === 'fx') {
+          if ((en === 'build' || en === 'drop') && node.mask[stepInBar] && Math.random() < 0.55) {
+            triggerNodeAtTime(node, time, step);
           }
         }
-        const curChord = styleData.chords[state.chordIdx % styleData.chords.length];
-        document.getElementById('chord-display').textContent = `${curChord.name} · ${styleData.name}`;
+      });
+    }
 
-        // 按声部乐理编排触发各 3D 节点
-        soundNodes.forEach(node => {
-          if (!node.enabled) return;
-
-          if (node.role === 'drums') {
-            const dt = node.subIndex % 3;
-            if (dt === 0 && styleData.kickSteps.includes(stepInBar)) triggerNodeSound(node);
-            if (dt === 1 && styleData.snareSteps.includes(stepInBar)) triggerNodeSound(node);
-            if (dt === 2 && styleData.hatSteps.includes(stepInBar) && (node.subIndex < 3 || stepInBar % 4 === 2)) {
-              triggerNodeSound(node);
-            }
-          } else if (node.role === 'bass') {
-            if ((stepInBar === 0 || stepInBar === 6 || stepInBar === 10) && (node.subIndex % 2 === (stepInBar === 0 ? 0 : 1))) {
-              triggerNodeSound(node);
-            }
-          } else if (node.role === 'pad') {
-            // 每小节开头错峰铺入，形成连绵不断的空间包裹感
-            if (stepInBar === (node.subIndex * 2) % 16) {
-              triggerNodeSound(node);
-            }
-          } else if (node.role === 'arp') {
-            // 空间环绕流动琶音
-            if (stepInBar % 2 === 0 && (Math.floor(stepInBar / 2) % 8 === node.subIndex)) {
-              triggerNodeSound(node);
-            }
-          } else if (node.role === 'lead') {
-            // 旋律乐句留白与呼应
-            if ((stepInBar === 0 || stepInBar === 3 || stepInBar === 7 || stepInBar === 11 || stepInBar === 14) &&
-                ((currentStep + node.subIndex) % 6 === 0)) {
-              triggerNodeSound(node);
-            }
-          } else if (node.role === 'fx') {
-            if (stepInBar === (node.subIndex * 4 + 2) % 16 && Math.random() < 0.65) {
-              triggerNodeSound(node);
-            }
-          }
-        });
-
+    function schedulerLoop() {
+      if (!state.isPlaying || !audioCtx) return;
+      const stepSec = 60 / state.bpm / 4;
+      while (nextNoteTime < audioCtx.currentTime + 0.09) {
+        scheduleStep(currentStep, nextNoteTime);
+        nextNoteTime += stepSec;
         currentStep++;
-        stepTimer = setTimeout(tick, getStepMs());
       }
-      tick();
+      schedulerTimer = setTimeout(schedulerLoop, 25);
+    }
+
+    function startSequencer() {
+      stopSequencer();
+      nextNoteTime = audioCtx.currentTime + 0.05;
+      schedulerLoop();
     }
 
     function stopSequencer() {
-      if (stepTimer) { clearTimeout(stepTimer); stepTimer = null; }
+      if (schedulerTimer) { clearTimeout(schedulerTimer); schedulerTimer = null; }
       stepCells.forEach(c => c.classList.remove('now'));
     }
 
-    // =========================================================
-    // 8. 交互事件与 UI 绑定
-    // =========================================================
+    // =========================================================================
+    // 8. UI 双向同步与交互事件
+    // =========================================================================
+    function applyMasterAudioParams() {
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      if (driveNode) driveNode.curve = makeDriveCurve(state.drive);
+      if (masterFilter) {
+        masterFilter.frequency.setTargetAtTime(state.cutoff, now, 0.03);
+        masterFilter.Q.setTargetAtTime(0.7 + state.reso * 3.5, now, 0.03);
+      }
+      if (reverbGain) reverbGain.gain.setTargetAtTime(state.reverbMix * 0.78, now, 0.04);
+      if (delayGain) delayGain.gain.setTargetAtTime(state.delayMix * 0.60, now, 0.04);
+      if (masterGain) masterGain.gain.setTargetAtTime(state.masterGain * 0.92, now, 0.03);
+      syncDelayTimes();
+    }
+
+    function syncGlobalControlsToUI() {
+      const setVal = (id, v, textId, text) => {
+        const el = document.getElementById(id);
+        el.value = v;
+        updateSliderVisual(el);
+        if (textId) document.getElementById(textId).textContent = text;
+      };
+      document.getElementById('ctrl-root').value = state.root;
+      document.getElementById('ctrl-scale').value = state.scale;
+      setVal('ctrl-bpm', state.bpm, 'val-bpm', state.bpm);
+      setVal('ctrl-pump', Math.round(state.pump * 100), 'val-pump', `${Math.round(state.pump * 100)}%`);
+      setVal('ctrl-drive', Math.round(state.drive * 100), 'val-drive', `${Math.round(state.drive * 100)}%`);
+      setVal('ctrl-reso', Math.round(state.reso * 100), 'val-reso', `${Math.round(state.reso * 100)}%`);
+    }
+
+    // 射线拾取 3D 球体
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     let downPos = { x: 0, y: 0 };
 
-    renderer.domElement.addEventListener('pointerdown', (e) => { downPos = { x: e.clientX, y: e.clientY }; });
-    renderer.domElement.addEventListener('pointerup', (e) => {
+    renderer.domElement.addEventListener('pointerdown', e => { downPos = { x: e.clientX, y: e.clientY }; });
+    renderer.domElement.addEventListener('pointerup', e => {
       if (Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y) > 6) return;
       pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
       pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -1775,7 +2577,9 @@
       if (hits.length > 0) {
         state.selectedIndex = hits[0].object.userData.nodeIndex;
         refreshInspector();
-        if (audioCtx && audioCtx.state === 'running') triggerNodeSound(soundNodes[state.selectedIndex], true);
+        if (audioCtx && audioCtx.state === 'running') {
+          triggerNodeAtTime(soundNodes[state.selectedIndex], audioCtx.currentTime + 0.01, currentStep, true);
+        }
       }
     });
 
@@ -1786,125 +2590,42 @@
     btnPlay.addEventListener('click', async () => {
       initAudioEngine();
       if (audioCtx.state === 'suspended') await audioCtx.resume();
-
       state.isPlaying = !state.isPlaying;
       if (state.isPlaying) {
         startSequencer();
-        btnPlay.innerHTML = '<span>■</span> 停止空间编曲';
+        btnPlay.innerHTML = '<span>■</span> 停止空间电音引擎';
         btnPlay.classList.add('playing');
         audioDot.classList.add('active');
-        hudStatus.textContent = `HRTF 空间引擎运行中 · ${STYLES[state.style].name}`;
+        hudStatus.textContent = `AETHER 3D 运行中 · ${STYLES[state.style].name} (${state.bpm} BPM)`;
       } else {
         stopSequencer();
-        btnPlay.innerHTML = '<span>▶</span> 启动空间编曲引擎';
+        btnPlay.innerHTML = '<span>▶</span> 启动 3D 空间电音引擎';
         btnPlay.classList.remove('playing');
         audioDot.classList.remove('active');
         hudStatus.textContent = '已暂停 · 点击左侧启动';
       }
     });
 
-    // 音乐风格切换
-    document.getElementById('ctrl-style').addEventListener('change', (e) => {
-      state.style = e.target.value;
-      state.chordIdx = 0;
-      state.bpm = STYLES[state.style].bpm;
-      document.getElementById('ctrl-bpm').value = state.bpm;
-      document.getElementById('val-bpm').textContent = state.bpm;
-      syncDelayTimes();
-      if (state.isPlaying) hudStatus.textContent = `HRTF 空间引擎运行中 · ${STYLES[state.style].name}`;
+    document.getElementById('ctrl-style').addEventListener('change', e => applyStyle(e.target.value));
+    document.getElementById('ctrl-root').addEventListener('change', e => { state.root = parseInt(e.target.value, 10); });
+    document.getElementById('ctrl-scale').addEventListener('change', e => { state.scale = e.target.value; });
+    document.getElementById('btn-mutate').addEventListener('click', mutateUniverse);
+    document.getElementById('btn-remix').addEventListener('click', crossGenreRemix);
+
+    document.querySelectorAll('#preset-grid .btn-chip').forEach(b => {
+      b.addEventListener('click', () => applyPreset(b.dataset.preset));
     });
 
-    // 8 种空间阵型点击
-    document.querySelectorAll('#preset-grid .btn-chip').forEach(btn => {
-      btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+    document.querySelectorAll('#energy-bar .energy-btn[data-energy]').forEach(b => {
+      b.addEventListener('click', () => setEnergyMode(b.dataset.energy));
     });
 
-    // 全局距离缩放进度条
-    document.getElementById('ctrl-scale').addEventListener('input', (e) => {
-      state.globalScale = parseFloat(e.target.value);
-      document.getElementById('val-scale').textContent = `${state.globalScale.toFixed(2)}x`;
-      soundNodes.forEach(syncNodePosition);
-      floorRings.forEach((ring) => ring.scale.setScalar(state.globalScale));
-      refreshInspector();
+    const btnAutoDJ = document.getElementById('btn-autodj');
+    btnAutoDJ.addEventListener('click', () => {
+      state.autoDJ = !state.autoDJ;
+      btnAutoDJ.classList.toggle('active', state.autoDJ);
     });
 
-    // 垂直高度跨度
-    document.getElementById('ctrl-height').addEventListener('input', (e) => {
-      const v = parseInt(e.target.value, 10);
-      state.heightSpread = v / 100;
-      document.getElementById('val-height').textContent = `${v}%`;
-      soundNodes.forEach(syncNodePosition);
-      refreshInspector();
-    });
-
-    // 环绕转速
-    document.getElementById('ctrl-orbit-speed').addEventListener('input', (e) => {
-      state.orbitMult = parseFloat(e.target.value);
-      document.getElementById('val-orbit-speed').textContent = `${state.orbitMult.toFixed(1)}x`;
-    });
-
-    // 激活点数
-    document.getElementById('ctrl-count').addEventListener('input', (e) => {
-      state.activeCount = parseInt(e.target.value, 10);
-      document.getElementById('val-count').textContent = `${state.activeCount} / ${MAX_NODES}`;
-      soundNodes.forEach((n, i) => { n.enabled = i < state.activeCount; updateNodeVisual(n); });
-    });
-
-    // 距离衰减
-    document.getElementById('ctrl-rolloff').addEventListener('input', (e) => {
-      state.rolloff = parseFloat(e.target.value);
-      document.getElementById('val-rolloff').textContent = state.rolloff.toFixed(1);
-      soundNodes.forEach(n => { if (n.panner) n.panner.rolloffFactor = state.rolloff; });
-    });
-
-    // 混响、延迟、明亮度、BPM、总音量
-    document.getElementById('ctrl-reverb').addEventListener('input', (e) => {
-      const v = parseInt(e.target.value, 10);
-      state.reverbMix = v / 100;
-      document.getElementById('val-reverb').textContent = `${v}%`;
-      if (reverbGain && audioCtx) reverbGain.gain.setTargetAtTime(state.reverbMix * 0.85, audioCtx.currentTime, 0.04);
-    });
-
-    document.getElementById('ctrl-delay').addEventListener('input', (e) => {
-      const v = parseInt(e.target.value, 10);
-      state.delayMix = v / 100;
-      document.getElementById('val-delay').textContent = `${v}%`;
-      if (delayGain && audioCtx) delayGain.gain.setTargetAtTime(state.delayMix * 0.65, audioCtx.currentTime, 0.04);
-    });
-
-    document.getElementById('ctrl-cutoff').addEventListener('input', (e) => {
-      state.cutoff = parseInt(e.target.value, 10);
-      document.getElementById('val-cutoff').textContent = state.cutoff >= 1000 ? `${(state.cutoff / 1000).toFixed(1)} kHz` : `${state.cutoff} Hz`;
-      if (masterFilter && audioCtx) masterFilter.frequency.setTargetAtTime(state.cutoff, audioCtx.currentTime, 0.03);
-    });
-
-    document.getElementById('ctrl-bpm').addEventListener('input', (e) => {
-      state.bpm = parseInt(e.target.value, 10);
-      document.getElementById('val-bpm').textContent = state.bpm;
-      syncDelayTimes();
-    });
-
-    document.getElementById('ctrl-master').addEventListener('input', (e) => {
-      const v = parseInt(e.target.value, 10);
-      state.masterGain = v / 100;
-      document.getElementById('val-master').textContent = `${v}%`;
-      if (masterGain && audioCtx) masterGain.gain.setTargetAtTime(state.masterGain * 0.9, audioCtx.currentTime, 0.03);
-    });
-
-    // 开关绑定
-    function bindSwitch(id, prop, cb) {
-      const el = document.getElementById(id);
-      el.addEventListener('click', () => {
-        state[prop] = !state[prop];
-        el.classList.toggle('on', state[prop]);
-        if (cb) cb(state[prop]);
-      });
-    }
-    bindSwitch('sw-hrtf', 'useHRTF', (on) => soundNodes.forEach(n => { if (n.panner) n.panner.panningModel = on ? 'HRTF' : 'equalpower'; }));
-    bindSwitch('sw-follow', 'followCamera', () => updateAudioListener());
-    bindSwitch('sw-prog', 'autoProgression');
-
-    // 底部 6 声部一键混音台
     document.querySelectorAll('#stem-mixer .stem-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const stem = btn.dataset.stem;
@@ -1914,24 +2635,115 @@
       });
     });
 
+    // 全局滑块监听
+    document.getElementById('ctrl-pump').addEventListener('input', e => {
+      const v = parseInt(e.target.value, 10);
+      state.pump = v / 100;
+      document.getElementById('val-pump').textContent = `${v}%`;
+    });
+    document.getElementById('ctrl-drive').addEventListener('input', e => {
+      const v = parseInt(e.target.value, 10);
+      state.drive = v / 100;
+      document.getElementById('val-drive').textContent = `${v}%`;
+      applyMasterAudioParams();
+    });
+    document.getElementById('ctrl-cutoff').addEventListener('input', e => {
+      state.cutoff = parseInt(e.target.value, 10);
+      document.getElementById('val-cutoff').textContent = state.cutoff >= 1000 ? `${(state.cutoff / 1000).toFixed(1)} kHz` : `${state.cutoff} Hz`;
+      applyMasterAudioParams();
+    });
+    document.getElementById('ctrl-reso').addEventListener('input', e => {
+      const v = parseInt(e.target.value, 10);
+      state.reso = v / 100;
+      document.getElementById('val-reso').textContent = `${v}%`;
+      applyMasterAudioParams();
+    });
+    document.getElementById('ctrl-reverb').addEventListener('input', e => {
+      const v = parseInt(e.target.value, 10);
+      state.reverbMix = v / 100;
+      document.getElementById('val-reverb').textContent = `${v}%`;
+      applyMasterAudioParams();
+    });
+    document.getElementById('ctrl-delay').addEventListener('input', e => {
+      const v = parseInt(e.target.value, 10);
+      state.delayMix = v / 100;
+      document.getElementById('val-delay').textContent = `${v}%`;
+      applyMasterAudioParams();
+    });
+    document.getElementById('ctrl-scale').addEventListener('input', e => {
+      state.globalScale = parseFloat(e.target.value);
+      document.getElementById('val-scale').textContent = `${state.globalScale.toFixed(2)}x`;
+      soundNodes.forEach(syncNodePosition);
+      refreshInspector();
+    });
+    document.getElementById('ctrl-height').addEventListener('input', e => {
+      const v = parseInt(e.target.value, 10);
+      state.heightSpread = v / 100;
+      document.getElementById('val-height').textContent = `${v}%`;
+      soundNodes.forEach(syncNodePosition);
+      refreshInspector();
+    });
+    document.getElementById('ctrl-orbit-speed').addEventListener('input', e => {
+      state.orbitMult = parseFloat(e.target.value);
+      document.getElementById('val-orbit-speed').textContent = `${state.orbitMult.toFixed(1)}x`;
+    });
+    document.getElementById('ctrl-count').addEventListener('input', e => {
+      state.activeCount = parseInt(e.target.value, 10);
+      document.getElementById('val-count').textContent = `${state.activeCount} / ${MAX_NODES}`;
+      soundNodes.forEach((n, i) => { n.enabled = i < state.activeCount; updateNodeVisual(n); });
+    });
+    document.getElementById('ctrl-groove').addEventListener('input', e => {
+      const v = parseInt(e.target.value, 10);
+      state.grooveDensity = v / 100;
+      document.getElementById('val-groove').textContent = `${v}%`;
+    });
+    document.getElementById('ctrl-rolloff').addEventListener('input', e => {
+      state.rolloff = parseFloat(e.target.value);
+      document.getElementById('val-rolloff').textContent = state.rolloff.toFixed(1);
+      soundNodes.forEach(n => { if (n.panner) n.panner.rolloffFactor = state.rolloff; });
+    });
+    document.getElementById('ctrl-bpm').addEventListener('input', e => {
+      state.bpm = parseInt(e.target.value, 10);
+      document.getElementById('val-bpm').textContent = state.bpm;
+      applyMasterAudioParams();
+    });
+    document.getElementById('ctrl-master').addEventListener('input', e => {
+      const v = parseInt(e.target.value, 10);
+      state.masterGain = v / 100;
+      document.getElementById('val-master').textContent = `${v}%`;
+      applyMasterAudioParams();
+    });
+
+    function bindSwitch(id, prop, cb) {
+      const el = document.getElementById(id);
+      el.addEventListener('click', () => {
+        state[prop] = !state[prop];
+        el.classList.toggle('on', state[prop]);
+        if (cb) cb(state[prop]);
+      });
+    }
+    bindSwitch('sw-hrtf', 'useHRTF', on => soundNodes.forEach(n => { if (n.panner) n.panner.panningModel = on ? 'HRTF' : 'equalpower'; }));
+    bindSwitch('sw-follow', 'followCamera', () => updateAudioListener());
+    bindSwitch('sw-beams', 'showBeams');
+
     document.getElementById('btn-randomize').addEventListener('click', () => {
       soundNodes.forEach(n => {
         n.azimuth = Math.round(Math.random() * 360 - 180);
         n.elevation = Math.round(Math.random() * 130 - 65);
-        n.baseDist = +(0.9 + Math.random() * 4.5).toFixed(2);
-        n.volume = +(0.45 + Math.random() * 0.55).toFixed(2);
+        n.baseDist = +(0.85 + Math.random() * 4.5).toFixed(2);
+        n.volume = +(0.5 + Math.random() * 0.5).toFixed(2);
         syncNodePosition(n);
       });
       refreshInspector();
     });
 
     document.getElementById('btn-reset-cam').addEventListener('click', () => {
-      camera.position.set(4.8, 2.8, -6.8);
+      camera.position.set(4.8, 2.7, -6.8);
       controls.target.set(0, 0, 0);
       controls.update();
     });
 
-    // 右侧单点控制逻辑
+    // 右侧单点控制面板更新
     function refreshInspector() {
       const n = soundNodes[state.selectedIndex];
       const meta = ROLE_META[n.role];
@@ -1945,76 +2757,85 @@
       document.getElementById('sel-el').textContent = `${Math.round(elev)}°`;
       document.getElementById('sel-dist').textContent = `${dist.toFixed(2)}m`;
 
-      document.getElementById('ctrl-node-vol').value = Math.round(n.volume * 100);
-      document.getElementById('val-node-vol').textContent = `${Math.round(n.volume * 100)}%`;
-
-      document.getElementById('ctrl-node-dist').value = n.baseDist;
-      document.getElementById('val-node-dist').textContent = `${n.baseDist.toFixed(2)}m`;
-
-      document.getElementById('ctrl-node-az').value = Math.round(n.azimuth);
-      document.getElementById('val-node-az').textContent = `${Math.round(n.azimuth)}°`;
-
-      document.getElementById('ctrl-node-el').value = Math.round(n.elevation);
-      document.getElementById('val-node-el').textContent = `${Math.round(n.elevation)}°`;
-
-      document.getElementById('ctrl-node-orbit').value = Math.round(n.orbitSpeed);
-      document.getElementById('val-node-orbit').textContent = `${Math.round(n.orbitSpeed)}°/s`;
-
+      document.getElementById('ctrl-node-timbre').value = n.timbre;
       document.getElementById('ctrl-node-role').value = n.role;
-      document.getElementById('ctrl-node-oct').value = n.octave;
-      document.getElementById('val-node-oct').textContent = n.octave > 0 ? `+${n.octave}` : `${n.octave}`;
+
+      const setRange = (id, val, txtId, txt) => {
+        const el = document.getElementById(id);
+        el.value = val;
+        updateSliderVisual(el);
+        document.getElementById(txtId).textContent = txt;
+      };
+      setRange('ctrl-node-oct', n.octave, 'val-node-oct', n.octave > 0 ? `+${n.octave}` : `${n.octave}`);
+      setRange('ctrl-node-density', n.density, 'val-node-density', `${n.density} / 16`);
+      setRange('ctrl-node-vol', Math.round(n.volume * 100), 'val-node-vol', `${Math.round(n.volume * 100)}%`);
+      setRange('ctrl-node-dist', n.baseDist, 'val-node-dist', `${n.baseDist.toFixed(2)}m`);
+      setRange('ctrl-node-az', Math.round(n.azimuth), 'val-node-az', `${Math.round(n.azimuth)}°`);
+      setRange('ctrl-node-el', Math.round(n.elevation), 'val-node-el', `${Math.round(n.elevation)}°`);
+      setRange('ctrl-node-orbit', Math.round(n.orbitSpeed), 'val-node-orbit', `${Math.round(n.orbitSpeed)}°/s`);
 
       document.getElementById('btn-node-solo').classList.toggle('active', state.soloIndex === n.index);
       document.getElementById('btn-node-mute').classList.toggle('active', n.muted);
     }
 
-    document.getElementById('ctrl-node-vol').addEventListener('input', (e) => {
+    document.getElementById('ctrl-node-timbre').addEventListener('change', e => {
+      const n = soundNodes[state.selectedIndex];
+      n.timbre = e.target.value;
+      if (audioCtx && audioCtx.state === 'running') triggerNodeAtTime(n, audioCtx.currentTime + 0.01, currentStep, true);
+    });
+    document.getElementById('ctrl-node-role').addEventListener('change', e => {
+      const n = soundNodes[state.selectedIndex];
+      n.role = e.target.value;
+      updateNodeVisual(n); refreshInspector();
+    });
+    document.getElementById('ctrl-node-oct').addEventListener('input', e => {
+      const n = soundNodes[state.selectedIndex];
+      n.octave = parseInt(e.target.value, 10);
+      refreshInspector();
+    });
+    document.getElementById('ctrl-node-density').addEventListener('input', e => {
+      const n = soundNodes[state.selectedIndex];
+      n.density = parseInt(e.target.value, 10);
+      n.mask = buildEuclidMask(n.density, 16, n.index);
+      refreshInspector();
+    });
+    document.getElementById('ctrl-node-vol').addEventListener('input', e => {
       const n = soundNodes[state.selectedIndex];
       n.volume = parseInt(e.target.value, 10) / 100;
       if (n.gainNode && audioCtx) n.gainNode.gain.setTargetAtTime(n.volume, audioCtx.currentTime, 0.02);
       syncNodePosition(n); refreshInspector();
     });
-    document.getElementById('ctrl-node-dist').addEventListener('input', (e) => {
+    document.getElementById('ctrl-node-dist').addEventListener('input', e => {
       const n = soundNodes[state.selectedIndex];
       n.baseDist = parseFloat(e.target.value);
       syncNodePosition(n); refreshInspector();
     });
-    document.getElementById('ctrl-node-az').addEventListener('input', (e) => {
+    document.getElementById('ctrl-node-az').addEventListener('input', e => {
       const n = soundNodes[state.selectedIndex];
       n.azimuth = parseFloat(e.target.value);
       syncNodePosition(n); refreshInspector();
     });
-    document.getElementById('ctrl-node-el').addEventListener('input', (e) => {
+    document.getElementById('ctrl-node-el').addEventListener('input', e => {
       const n = soundNodes[state.selectedIndex];
       n.elevation = parseFloat(e.target.value);
       syncNodePosition(n); refreshInspector();
     });
-    document.getElementById('ctrl-node-orbit').addEventListener('input', (e) => {
+    document.getElementById('ctrl-node-orbit').addEventListener('input', e => {
       const n = soundNodes[state.selectedIndex];
       n.orbitSpeed = parseFloat(e.target.value);
       refreshInspector();
     });
-    document.getElementById('ctrl-node-role').addEventListener('change', (e) => {
-      const n = soundNodes[state.selectedIndex];
-      n.role = e.target.value;
-      updateNodeVisual(n); refreshInspector();
-    });
-    document.getElementById('ctrl-node-oct').addEventListener('input', (e) => {
-      const n = soundNodes[state.selectedIndex];
-      n.octave = parseInt(e.target.value, 10);
-      refreshInspector();
-    });
 
-    // 快捷贴耳定位按钮
     const snapNode = (az, el, d) => {
       const n = soundNodes[state.selectedIndex];
       n.azimuth = az; n.elevation = el; n.baseDist = d; n.orbitSpeed = 0;
       syncNodePosition(n); refreshInspector();
-      if (audioCtx && audioCtx.state === 'running') triggerNodeSound(n, true);
+      if (audioCtx && audioCtx.state === 'running') triggerNodeAtTime(n, audioCtx.currentTime + 0.01, currentStep, true);
     };
-    document.getElementById('btn-snap-l').addEventListener('click', () => snapNode(-90, 0, 0.85));
-    document.getElementById('btn-snap-f').addEventListener('click', () => snapNode(0, 0, 1.2));
-    document.getElementById('btn-snap-r').addEventListener('click', () => snapNode(90, 0, 0.85));
+    document.getElementById('btn-snap-l').addEventListener('click', () => snapNode(-90, 0, 0.78));
+    document.getElementById('btn-snap-f').addEventListener('click', () => snapNode(0, 0, 1.15));
+    document.getElementById('btn-snap-r').addEventListener('click', () => snapNode(90, 0, 0.78));
+    document.getElementById('btn-snap-t').addEventListener('click', () => snapNode(0, 75, 1.25));
 
     document.getElementById('btn-node-solo').addEventListener('click', () => {
       state.soloIndex = (state.soloIndex === state.selectedIndex) ? -1 : state.selectedIndex;
@@ -2028,27 +2849,29 @@
     document.getElementById('btn-node-ping').addEventListener('click', async () => {
       initAudioEngine();
       if (audioCtx.state === 'suspended') await audioCtx.resume();
-      triggerNodeSound(soundNodes[state.selectedIndex], true);
+      triggerNodeAtTime(soundNodes[state.selectedIndex], audioCtx.currentTime + 0.01, currentStep, true);
     });
 
+    // 初始化默认风格与空间阵型
+    applyStyle('melodicTechno');
     applyPreset('nebula');
 
-    // =========================================================
-    // 9. 主渲染循环 + 双耳电平实时刷新
-    // =========================================================
+    // =========================================================================
+    // 9. 120Hz 高刷渲染主循环 + 音频视觉联动
+    // =========================================================================
     const meterL = document.getElementById('meter-l');
     const meterR = document.getElementById('meter-r');
     const timeDataL = new Uint8Array(256);
     const timeDataR = new Uint8Array(256);
 
-    function getPeakPercent(analyser, arr) {
+    function getPeakPct(analyser, arr) {
       analyser.getByteTimeDomainData(arr);
       let max = 0;
       for (let i = 0; i < arr.length; i++) {
         const v = Math.abs(arr[i] - 128) / 128;
         if (v > max) max = v;
       }
-      return Math.min(100, Math.round(max * 145));
+      return Math.min(100, Math.round(max * 140));
     }
 
     let lastTime = performance.now();
@@ -2060,15 +2883,36 @@
       controls.update();
       if (state.followCamera) updateAudioListener();
 
-      // 实时刷新左右耳电平表
       if (analyserL && analyserR && state.isPlaying) {
-        meterL.style.width = `${getPeakPercent(analyserL, timeDataL)}%`;
-        meterR.style.width = `${getPeakPercent(analyserR, timeDataR)}%`;
+        meterL.style.width = `${getPeakPct(analyserL, timeDataL)}%`;
+        meterR.style.width = `${getPeakPct(analyserR, timeDataR)}%`;
       } else {
         meterL.style.width = '0%';
         meterR.style.width = '0%';
       }
 
+      // 底鼓驱动地面光环与目镜呼吸发光
+      kickVisualPulse *= Math.pow(0.008, dt);
+      const ringBreath = state.globalScale * (1 + kickVisualPulse * 0.045);
+      floorRings.forEach((ring, i) => {
+        ring.scale.setScalar(ringBreath);
+        ring.material.opacity = (0.22 - i * 0.038) + kickVisualPulse * (i === 0 ? 0.35 : 0.08);
+      });
+      if (headVisorMat) {
+        headVisorMat.emissiveIntensity = 0.45 + kickVisualPulse * 1.4;
+      }
+
+      // 更新声波汇聚射线衰减
+      beamPool.forEach(b => {
+        if (b.life > 0.01) {
+          b.life *= Math.pow(0.004, dt);
+          b.mat.opacity = b.life * 0.55;
+        } else if (b.line.visible) {
+          b.line.visible = false;
+        }
+      });
+
+      // 更新 36 个节点公转与发光脉冲
       soundNodes.forEach((n, idx) => {
         if (!n.enabled) return;
 
@@ -2080,15 +2924,15 @@
         }
 
         if (n.pulse > 0.01) {
-          n.pulse *= Math.pow(0.06, dt);
+          n.pulse *= Math.pow(0.035, dt);
           n.halo.visible = true;
           n.halo.lookAt(camera.position);
-          n.halo.scale.setScalar(1 + (1 - n.pulse) * 2.9);
-          n.halo.material.opacity = n.pulse * 0.85;
-          n.mesh.material.emissiveIntensity = 0.45 + n.pulse * 1.9;
+          n.halo.scale.setScalar(1 + (1 - n.pulse) * 3.1);
+          n.halo.material.opacity = n.pulse * 0.9;
+          n.mesh.material.emissiveIntensity = 0.45 + n.pulse * 2.2;
         } else {
           n.halo.visible = false;
-          n.mesh.material.emissiveIntensity = idx === state.selectedIndex ? 1.25 : 0.4;
+          n.mesh.material.emissiveIntensity = idx === state.selectedIndex ? 1.35 : 0.42;
         }
       });
 
